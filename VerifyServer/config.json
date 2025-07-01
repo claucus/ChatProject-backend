@@ -1,0 +1,16 @@
+{
+    "email": {
+        "user":"schwarzgg@163.com",
+        "password":"ASa8jRK44yjKKsPY"
+    },
+    "mysql":{
+        "host":"127.0.0.1",
+        "port":"3306",
+        "password":"somebody2333"
+    },
+    "redis":{
+        "host":"127.0.0.1",
+        "port":"6379",
+        "password":"123456"
+    }
+}
