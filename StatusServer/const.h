@@ -2,6 +2,15 @@
 
 constexpr auto CODE_PREFIX = "code_";
 
+
+namespace ChatServerConstant {
+	constexpr auto LOGIN_COUNT = "login_count";
+	constexpr auto USER_TOKEN_PREFIX = "user_token_";
+	constexpr auto USER_INFO_PREFIX = "user_info_";
+	constexpr auto USER_IP_PREFIX = "user_ip_";
+}
+
+
 enum class ErrorCodes
 {
 	SUCCESS = 0,

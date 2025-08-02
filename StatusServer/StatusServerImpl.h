@@ -9,6 +9,21 @@ struct ChatServer {
 	std::string port;
 	std::string name;
 	size_t con_count;
+
+	ChatServer(): host(""),port(""),name(""),con_count(0){}
+	ChatServer(const ChatServer& server): host(server.host),port(server.port),name(server.name),con_count(server.con_count){}
+	ChatServer& operator=(const ChatServer& server) {
+		if (&server == this) {
+			return *this;
+		}
+
+		host = server.host;
+		port = server.port;
+		name = server.name;
+		con_count = server.con_count;
+		
+		return *this;
+	}
 };
 
 class StatusServerImpl final : public message::StatusService::Service

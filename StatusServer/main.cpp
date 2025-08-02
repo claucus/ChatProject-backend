@@ -54,6 +54,8 @@ void initServerLogger()
 
 int main() {
 	try {
+		initServerLogger();
+
 		auto& configManager = ConfigManager::GetInstance();
 
 		std::string addr(configManager["StatusServer"]["host"] + ":" + configManager["StatusServer"]["port"]);
