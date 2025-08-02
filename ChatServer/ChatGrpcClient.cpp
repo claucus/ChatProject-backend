@@ -34,8 +34,29 @@ message::GetFriendListResponse ChatGrpcClient::GetFriendList(const message::GetC
 
 ChatGrpcClient::ChatGrpcClient()
 {
-	//auto& configManager = ConfigManager::GetInstance();
-	//std::string host = configManager["text"]["host"];
-	//std::string port = configManager["text"]["port"];
+	auto& configManager = ConfigManager::GetInstance();
+	
+	auto serverList = configManager["PeerServer"]["ServerList"];
 
+	std::vector<std::string> servers;
+
+	std::stringstream ss(serverList);
+	std::string serverName;
+	
+	while (std::getline(ss, serverName, ',')) {
+		servers.emplace_back(serverName);
+	}
+
+
+	for (auto& serverName : servers) {
+		if (configManager[serverName]["name"].empty()) {
+			continue;
+		}
+		_pools[configManager[serverName]["name"]] = 
+			std::make_unique<ChatConPool>(
+				(size_t)(std::thread::hardware_concurrency()),
+				configManager[serverName]["host"],
+				configManager[serverName]["port"]
+			);
+	}
 }

@@ -25,6 +25,14 @@ std::string SectionInfo::operator[](const std::string& key)
 	return _section[key];
 }
 
+std::string SectionInfo::getValue(const std::string& key)
+{
+	if (_section.find(key) == _section.end()) {
+		return nullptr;
+	}
+	return _section[key];
+}
+
 SectionInfo::~SectionInfo()
 {
 	_section.clear();
@@ -66,6 +74,15 @@ ConfigManager::ConfigManager()
 		_configMap[sectionName] = sectionInfo;
 	}
     spdlog::info("[ConfigManager] Loading config.ini Success");
+}
+
+std::string ConfigManager::getValue(const std::string& section, const std::string& key)
+{
+	if (_configMap.find(section) == _configMap.end()) {
+		return nullptr;
+	}
+
+	return _configMap[section].getValue(key);
 }
 
 SectionInfo ConfigManager::operator[](const std::string& section)

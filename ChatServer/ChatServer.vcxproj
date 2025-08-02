@@ -128,6 +128,7 @@
     <ClInclude Include="BaseDAO.h" />
     <ClInclude Include="BaseNode.h" />
     <ClInclude Include="ChatGrpcClient.h" />
+    <ClInclude Include="ChatServerImpl.h" />
     <ClInclude Include="ConfigManager.h" />
     <ClInclude Include="const.h" />
     <ClInclude Include="CServer.h" />
@@ -141,14 +142,17 @@
     <ClInclude Include="MessageNode.h" />
     <ClInclude Include="MySQLConPool.h" />
     <ClInclude Include="MySQLManager.h" />
+    <ClInclude Include="RedisConPool.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="StatusGrpcClient.h" />
     <ClInclude Include="UserDAO.h" />
     <ClInclude Include="UserInfo.h" />
+    <ClInclude Include="UserManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseNode.cpp" />
     <ClCompile Include="ChatGrpcClient.cpp" />
+    <ClCompile Include="ChatServerImpl.cpp" />
     <ClCompile Include="ConfigManager.cpp" />
     <ClCompile Include="CServer.cpp" />
     <ClCompile Include="CSession.cpp" />
@@ -161,8 +165,10 @@
     <ClCompile Include="MessageNode.cpp" />
     <ClCompile Include="MySQLConPool.cpp" />
     <ClCompile Include="MySQLManager.cpp" />
+    <ClCompile Include="RedisConPool.cpp" />
     <ClCompile Include="StatusGrpcClient.cpp" />
     <ClCompile Include="UserDAO.cpp" />
+    <ClCompile Include="UserManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="config.ini" />

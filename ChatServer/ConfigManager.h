@@ -11,6 +11,7 @@ struct SectionInfo {
 	SectionInfo(const SectionInfo&);
 	SectionInfo& operator=(const SectionInfo&);
 	std::string operator[](const std::string&);
+	std::string getValue(const std::string& key);
 
 };
 class ConfigManager
@@ -22,6 +23,8 @@ public:
 
 	ConfigManager(const ConfigManager&) = delete;
 	ConfigManager& operator=(const ConfigManager&) = delete;
+
+	std::string getValue(const std::string &section,const std::string& key);
 
 	SectionInfo operator[](const std::string&);
 

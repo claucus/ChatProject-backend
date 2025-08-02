@@ -1,4 +1,5 @@
 #include "CServer.h"
+#include "UserManager.h"
 #include <spdlog/spdlog.h>
 
 CServer::CServer(boost::asio::io_context& ioc, short port):
@@ -18,8 +19,13 @@ CServer::~CServer()
 void CServer::clearSession(std::string session)
 {
 	if (_sessions.find(session) != _sessions.end()) {
-		std::lock_guard<std::mutex> lock(_mutex);
-		_sessions.erase(session);
+		UserManager::GetInstance()->removeUserSession(_sessions[session]->GetUid());
+
+		{
+			std::lock_guard<std::mutex> lock(_mutex);
+			_sessions.erase(session);
+		}
+
 		spdlog::debug("[Server] Session {} removed, remaining sessions: {}", session, _sessions.size());
 	}
 	else {
@@ -33,9 +39,9 @@ void CServer::handlerAccept(std::shared_ptr<CSession> newSession, const boost::s
 		newSession->Start();
 		{
 			std::lock_guard<std::mutex> lock(_mutex);
-			_sessions.insert(std::make_pair(newSession->GetUuid(), newSession));
+			_sessions.insert(std::make_pair(newSession->GetUid(), newSession));
 			spdlog::info("[Server] New session accepted - UUID: {}, Total sessions: {}", 
-						newSession->GetUuid(), _sessions.size());
+						newSession->GetUid(), _sessions.size());
 		}
 	}
 	else {

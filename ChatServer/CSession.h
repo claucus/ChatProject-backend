@@ -17,7 +17,8 @@ public:
 	~CSession();
 
 	boost::asio::ip::tcp::socket& GetSocket();
-	std::string& GetUuid();
+	std::string& GetUid();
+	void SetUid(const std::string& uid);
 
 	void Start();
 	void Close();
@@ -29,7 +30,7 @@ private:
 	char _buffer[BUFFER_SIZE];
 
 	boost::asio::ip::tcp::socket _socket;
-	std::string _uuid;
+	std::string _uid;
 
 	CServer* _server;
 	std::atomic<bool> _b_close;
