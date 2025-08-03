@@ -119,7 +119,7 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
 
     Json::Value rootValue;
 
-    std::string tokenKey = ChatServerConstant::USER_TOKEN_PREFIX + uid;
+    std::string tokenKey = ChatServiceConstant::USER_TOKEN_PREFIX + uid;
 
     auto tokenValue = RedisConPool::GetInstance().get(tokenKey).value();
     if (tokenValue.empty()) {
@@ -140,7 +140,7 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
 
     rootValue["error"] = static_cast<size_t>(ErrorCodes::SUCCESS);
 
-    std::string baseKey = ChatServerConstant::USER_INFO_PREFIX + uid;
+    std::string baseKey = ChatServiceConstant::USER_INFO_PREFIX + uid;
     auto userInfo = std::make_shared<UserInfo>();
 
     auto baseInfoExists = GetUserInfo(baseKey, uid, userInfo);
@@ -161,7 +161,7 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
 
     auto serverName = ConfigManager::GetInstance().getValue("SelfServer","name");
     
-    auto redisResult = RedisConPool::GetInstance().hget(ChatServerConstant::LOGIN_COUNT, serverName).value();
+    auto redisResult = RedisConPool::GetInstance().hget(ChatServiceConstant::LOGIN_COUNT, serverName).value();
     int loginCount = 0;
 
     if (!redisResult.empty()) {
@@ -170,11 +170,11 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
 
     loginCount++;
 
-	RedisConPool::GetInstance().hset(ChatServerConstant::LOGIN_COUNT, serverName, std::to_string(loginCount));
+	RedisConPool::GetInstance().hset(ChatServiceConstant::LOGIN_COUNT, serverName, std::to_string(loginCount));
 
     session->SetUid(uid);
 
-	std::string ipKey = ChatServerConstant::USER_IP_PREFIX + uid;
+	std::string ipKey = ChatServiceConstant::USER_IP_PREFIX + uid;
     RedisConPool::GetInstance().set(ipKey, serverName);
 
     UserManager::GetInstance()->setUserSession(uid,session);

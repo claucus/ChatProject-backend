@@ -90,7 +90,7 @@ ChatServer StatusServerImpl::GetChatServer()
     std::lock_guard<std::mutex> lock(_serverMutex);
     auto minServer = _servers.begin()->second;
 
-    auto count = RedisConPool::GetInstance().hget(ChatServerConstant::LOGIN_COUNT, minServer.name).value();
+    auto count = RedisConPool::GetInstance().hget(ChatServiceConstant::LOGIN_COUNT, minServer.name).value();
     if (count.empty()) {
         minServer.con_count = INT_MAX;
     }
@@ -105,7 +105,7 @@ ChatServer StatusServerImpl::GetChatServer()
             continue;
         }
 
-		auto count = RedisConPool::GetInstance().hget(ChatServerConstant::LOGIN_COUNT, server.second.name).value();
+		auto count = RedisConPool::GetInstance().hget(ChatServiceConstant::LOGIN_COUNT, server.second.name).value();
         if (count.empty()) {
             server.second.con_count = INT_MAX;
         }

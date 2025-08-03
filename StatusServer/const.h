@@ -3,7 +3,7 @@
 constexpr auto CODE_PREFIX = "code_";
 
 
-namespace ChatServerConstant {
+namespace ChatServiceConstant {
 	constexpr auto LOGIN_COUNT = "login_count";
 	constexpr auto USER_TOKEN_PREFIX = "user_token_";
 	constexpr auto USER_INFO_PREFIX = "user_info_";

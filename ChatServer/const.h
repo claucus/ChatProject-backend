@@ -13,7 +13,7 @@ constexpr auto HEADER_DATA_LENGTH = 2;
 constexpr auto HEADER_TOTAL_LENGTH = HEADER_DATA_LENGTH + HEADER_ID_LENGTH;
 
 
-namespace ChatServerConstant {
+namespace ChatServiceConstant {
 	constexpr auto LOGIN_COUNT = "login_count";
 	constexpr auto USER_TOKEN_PREFIX = "user_token_";
 	constexpr auto USER_INFO_PREFIX = "user_info_";

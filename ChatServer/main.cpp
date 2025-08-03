@@ -62,7 +62,7 @@ int main() {
 		spdlog::info("Starting {} server...", serverName);
 
 		spdlog::debug("Initializing Redis connection pool");
-		RedisConPool::GetInstance().hset(ChatServerConstant::LOGIN_COUNT,serverName,"0");
+		RedisConPool::GetInstance().hset(ChatServiceConstant::LOGIN_COUNT,serverName,"0");
 		spdlog::debug("Redis login count initialized for server: {}", serverName);
 
 		spdlog::debug("Initializing IO Context Pool");
@@ -105,7 +105,7 @@ int main() {
 		ioc.run();
 
 		spdlog::info("Cleaning up server resources");
-		RedisConPool::GetInstance().hdel(ChatServerConstant::LOGIN_COUNT, serverName);
+		RedisConPool::GetInstance().hdel(ChatServiceConstant::LOGIN_COUNT, serverName);
 		if (grpcServerThread.joinable()) {
 			grpcServerThread.join();
 		}
