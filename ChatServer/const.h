@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 constexpr auto MAX_LENGTH = 1024 * 2;
 constexpr auto BUFFER_SIZE = 1024 * 2;
@@ -33,4 +33,5 @@ enum class ErrorCodes
 enum class MessageID {
 	MESSAGE_CHAT_LOGIN = 1005,
 	MESSAGE_CHAT_LOGIN_RESPONSE = 1006,
+	MESSAGE_GET_SEARCH_USER = 1007,
 };

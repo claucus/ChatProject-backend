@@ -1,4 +1,4 @@
-#include "LogicSystem.h"
+﻿#include "LogicSystem.h"
 #include "StatusGrpcClient.h"
 #include "MySQLManager.h"
 #include "RedisConPool.h"
@@ -103,6 +103,14 @@ void LogicSystem::RegisterCallBack()
             std::placeholders::_2,
             std::placeholders::_3);
     spdlog::info("[LogicSystem] Registered login handler for message ID: {}", id);
+
+    id = static_cast<size_t>(MessageID::MESSAGE_GET_SEARCH_USER);
+    _funcCallBack[id] = std::bind(&LogicSystem::SearchHandler, this,
+            std::placeholders::_1,
+            std::placeholders::_2,
+            std::placeholders::_3);
+
+    spdlog::info("[LogicSystem] Registered login handler for message ID: {}", id);
 }
 
 void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData)
@@ -183,6 +191,18 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
     std::string returnStr = rootValue.toStyledString();
     session->Send(returnStr, static_cast<size_t>(MessageID::MESSAGE_CHAT_LOGIN_RESPONSE));
     spdlog::info("[LogicSystem] Login successful for UID: {}", uid);
+
+    return;
+}
+
+void LogicSystem::SearchHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData)
+{
+    Json::Reader reader;
+    Json::Value root;
+    reader.parse(messageData, root);
+    auto uid = root["uid"].asString();
+    
+    Json::Value rootValue;
 
     return;
 }
