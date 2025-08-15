@@ -4,12 +4,12 @@
 #include "RedisConPool.h"
 #include "ConfigManager.h"
 #include "UserManager.h"
-
-#include <json/json.h>
-#include <json/reader.h>
-#include <json/value.h>
+#include "Defer.h"
 
 #include <spdlog/spdlog.h>
+
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 LogicSystem::~LogicSystem()
 {
@@ -116,95 +116,88 @@ void LogicSystem::RegisterCallBack()
 void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData)
 {
     spdlog::info("[LogicSystem] Processing login request...");
-    Json::Reader reader;
-    Json::Value root;
-    reader.parse(messageData, root);
 
-    auto uid = root["uid"].asString();
-    auto token = root["token"].asString();
-    spdlog::info("[LogicSystem] Login attempt - UID: {}, Token length: {}", uid, token.length());
-    
+    json root;
+    defer{
+		std::string returnStr = root.dump(4);
+		session->Send(returnStr, static_cast<size_t>(MessageID::MESSAGE_CHAT_LOGIN_RESPONSE));
+    };
 
-    Json::Value rootValue;
+    try {
+        auto src = json::parse(messageData);
 
-    std::string tokenKey = ChatServiceConstant::USER_TOKEN_PREFIX + uid;
+        std::string uid = src["uid"].get<std::string>();
+        std::string token = src["token"].get<std::string>();
+        spdlog::info("[LogicSystem] Login attempt - UID: {}, Token length: {}", uid, token.length());
 
-    auto tokenValue = RedisConPool::GetInstance().get(tokenKey).value();
-    if (tokenValue.empty()) {
-		spdlog::error("[LogicSystem] Token not found in Redis for UID: {}", uid);
-        rootValue["error"] = static_cast<size_t>(ErrorCodes::UID_INVALID);
-        std::string returnStr = rootValue.toStyledString();
-        session->Send(returnStr, static_cast<size_t>(MessageID::MESSAGE_CHAT_LOGIN_RESPONSE));
-        return;
-    }
 
-    if (tokenValue != token) {
-        spdlog::error("[LogicSystem] Token mismatch for UID: {}", uid);
-        rootValue["error"] = static_cast<size_t>(ErrorCodes::TOKEN_INVALID);
-        std::string returnStr = rootValue.toStyledString();
-        session->Send(returnStr, static_cast<size_t>(MessageID::MESSAGE_CHAT_LOGIN_RESPONSE));
+        std::string tokenKey = ChatServiceConstant::USER_TOKEN_PREFIX + uid;
+        auto tokenValue = RedisConPool::GetInstance().get(tokenKey).value();
+
+		if (tokenValue.empty()) {
+			spdlog::error("[LogicSystem] Token not found in Redis for UID: {}", uid);
+			root["error"] = static_cast<size_t>(ErrorCodes::UID_INVALID);
+			return;
+		}
+
+		if (tokenValue != token) {
+			spdlog::error("[LogicSystem] Token mismatch for UID: {}", uid);
+			root["error"] = static_cast<size_t>(ErrorCodes::TOKEN_INVALID);
+			return;
+		}
+
+
+		root["error"] = static_cast<size_t>(ErrorCodes::SUCCESS);
+		std::string baseKey = ChatServiceConstant::USER_INFO_PREFIX + uid;
+        auto userInfo = std::make_shared<UserInfo>();
+        
+        auto baseInfoExists = GetUserInfo(baseKey, uid, userInfo);
+
+		if (!baseInfoExists) {
+			spdlog::error("[LogicSystem] User info not found for UID: {}", uid);
+			root["error"] = static_cast<size_t>(ErrorCodes::UID_INVALID);
+			return;
+		}
+
+        root["uid"] = uid;
+        root["username"] = userInfo->_username;
+        root["email"] = userInfo->_email;
+        root["password"] = userInfo->_password;
+
+
+		auto serverName = ConfigManager::GetInstance().getValue("SelfServer", "name");
+
+		auto redisResult = RedisConPool::GetInstance().hget(ChatServiceConstant::LOGIN_COUNT, serverName).value();
+		int loginCount = 0;
+
+		if (!redisResult.empty()) {
+			loginCount = std::stoi(redisResult);
+		}
+
+		loginCount++;
+
+		RedisConPool::GetInstance().hset(ChatServiceConstant::LOGIN_COUNT, serverName, std::to_string(loginCount));
+
+		session->SetUid(uid);
+
+		std::string ipKey = ChatServiceConstant::USER_IP_PREFIX + uid;
+		RedisConPool::GetInstance().set(ipKey, serverName);
+
+		UserManager::GetInstance()->setUserSession(uid, session);
+
+		spdlog::info("[LogicSystem] Login successful for UID: {}", uid);
+
 		return;
     }
-
-    rootValue["error"] = static_cast<size_t>(ErrorCodes::SUCCESS);
-
-    std::string baseKey = ChatServiceConstant::USER_INFO_PREFIX + uid;
-    auto userInfo = std::make_shared<UserInfo>();
-
-    auto baseInfoExists = GetUserInfo(baseKey, uid, userInfo);
-
-    if (!baseInfoExists) {
-		spdlog::error("[LogicSystem] User info not found for UID: {}", uid);
-        rootValue["error"] = static_cast<size_t>(ErrorCodes::UID_INVALID);
-        std::string returnStr = rootValue.toStyledString();
-        session->Send(returnStr, static_cast<size_t>(MessageID::MESSAGE_CHAT_LOGIN_RESPONSE));
-        return;
+    catch (const json::parse_error& e) {
+        spdlog::warn("[LogicSystem] Failed to parse JSON in LoginHandler: {}", e.what());
+        root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
     }
-
-    rootValue["uid"] = uid;
-    rootValue["username"] = userInfo->_name;
-    rootValue["email"] = userInfo->_email;
-    rootValue["password"] = userInfo->_password;
-
-
-    auto serverName = ConfigManager::GetInstance().getValue("SelfServer","name");
-    
-    auto redisResult = RedisConPool::GetInstance().hget(ChatServiceConstant::LOGIN_COUNT, serverName).value();
-    int loginCount = 0;
-
-    if (!redisResult.empty()) {
-        loginCount = std::stoi(redisResult);
-    }
-
-    loginCount++;
-
-	RedisConPool::GetInstance().hset(ChatServiceConstant::LOGIN_COUNT, serverName, std::to_string(loginCount));
-
-    session->SetUid(uid);
-
-	std::string ipKey = ChatServiceConstant::USER_IP_PREFIX + uid;
-    RedisConPool::GetInstance().set(ipKey, serverName);
-
-    UserManager::GetInstance()->setUserSession(uid,session);
-
-
-    std::string returnStr = rootValue.toStyledString();
-    session->Send(returnStr, static_cast<size_t>(MessageID::MESSAGE_CHAT_LOGIN_RESPONSE));
-    spdlog::info("[LogicSystem] Login successful for UID: {}", uid);
-
-    return;
 }
 
 void LogicSystem::SearchHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData)
 {
-    Json::Reader reader;
-    Json::Value root;
-    reader.parse(messageData, root);
-    auto uid = root["uid"].asString();
-    
-    Json::Value rootValue;
 
-    return;
 }
 
 bool LogicSystem::GetUserInfo(std::string baseKey, std::string uid, std::shared_ptr<UserInfo>& userInfo)
@@ -212,16 +205,17 @@ bool LogicSystem::GetUserInfo(std::string baseKey, std::string uid, std::shared_
 	auto baseInfo = RedisConPool::GetInstance().get(baseKey).value();
 
 	if (!baseInfo.empty()) {
-		Json::Reader reader;
-		Json::Value root;
-		reader.parse(baseInfo, root);
-
-		userInfo->_uid = root["uid"].asString();
-		userInfo->_name = root["username"].asString();
-		userInfo->_email = root["email"].asString();
-		userInfo->_password = root["password"].asString();
-		spdlog::info("[LogicSystem] Retrieved user info for uid: {}", uid);
-		return true;
+        try {
+            auto src = json::parse(baseInfo);
+            userInfo->_uid = src["uid"].get<std::string>();
+            userInfo->_username = src["username"].get<std::string>();
+            userInfo->_password = src["password"].get<std::string>();
+			spdlog::info("[LogicSystem] Retrieved user info for uid: {}", uid);
+        }
+        catch(const json::parse_error& e){
+			spdlog::warn("[LogicSystem] Failed to parse JSON in GetUserInfo: {}", e.what());
+        }
+        return true;
 	}
 	else {
 		spdlog::error("[LogicSystem] No user info found for uid: {}", uid);
@@ -236,12 +230,13 @@ bool LogicSystem::GetUserInfo(std::string baseKey, std::string uid, std::shared_
 
 		userInfo = tmp_userInfo;
 
-		Json::Value redisRoot;
-		redisRoot["uid"] = userInfo->_uid;
-		redisRoot["username"] = userInfo->_name;
-		redisRoot["email"] = userInfo->_email;
-		redisRoot["password"] = userInfo->_password;
-		std::string redisString = redisRoot.toStyledString();
+        json root;
+        root["uid"] = userInfo->_uid;
+        root["username"] = userInfo->_username;
+        root["email"] = userInfo->_email;
+        root["password"] = userInfo->_password;
+
+        std::string redisString = root.dump(4);
 		RedisConPool::GetInstance().set(baseKey, redisString);
 		spdlog::info("[LogicSystem] Cached user info for uid: {}", uid);
 	}

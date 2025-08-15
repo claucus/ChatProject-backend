@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "BaseDAO.h"
 #include "UserInfo.h"
 #include <mysqlx/xdevapi.h>

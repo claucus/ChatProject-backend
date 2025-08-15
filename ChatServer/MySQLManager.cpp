@@ -1,4 +1,4 @@
-#include "MySQLManager.h"
+﻿#include "MySQLManager.h"
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <random>
@@ -24,6 +24,9 @@ bool MySQLManager::RegisterUser(UserInfo& user)
 			if (!isdigit(ch)) {
 				ch = ch - 'a';
 				ch = ch + '0';
+                if (ch == '0') {
+                    ch = '1';
+                }
 			}
 		}
 		auto rnd = [](int x)->int {

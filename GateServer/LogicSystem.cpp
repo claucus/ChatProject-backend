@@ -5,11 +5,8 @@
 #include "VerifyGrpcClient.h"
 #include "MySQLManager.h"
 #include "StatusGrpcClient.h"
-#include <spdlog/spdlog.h>
-#include <json/json.h>
-#include <json/reader.h>
-#include <json/value.h>
 #include "Defer.h"
+#include <spdlog/spdlog.h>
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
