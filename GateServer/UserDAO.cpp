@@ -1,4 +1,4 @@
-#include "UserDAO.h"
+ï»¿#include "UserDAO.h"
 #include <iostream>
 #include <spdlog/spdlog.h>
 
@@ -7,12 +7,15 @@ bool UserDAO::Insert(const UserInfo& user)
     auto conn = GetConnection();
     try {
         spdlog::info("[UserDAO] Inserting user: uid={}, email={}", user._uid, user._email);
-        auto result = conn->sql("CALL sp_insert_user(?,?,?,?,?,@success)")
+        auto result = conn->sql("CALL sp_insert_user(?, ?, ?, ?, ?, ?, ?, ?, @success)")
             .bind(user._uid)
             .bind(user._email)
-            .bind(user._name)
+            .bind(user._username)
             .bind(user._password)
             .bind(ENCRYPTION_KEY)
+            .bind(user._birth.empty() ? "" : user._birth)
+            .bind(user._sex.empty() ? "" : user._sex)
+            .bind(user._avatar.empty() ? nullptr : user._avatar.data(), user._avatar.size())
             .execute();
 
         auto statusResult = conn->sql("SELECT @success").execute();
@@ -39,11 +42,14 @@ bool UserDAO::Update(const UserInfo& user)
     auto conn = GetConnection();
     try {
         spdlog::info("[UserDAO] Updating user: uid={}, email={}", user._uid, user._email);
-        auto result = conn->sql("CALL sp_update_user(?, ?, ?, ?, @success)")
+        auto result = conn->sql("CALL sp_update_user(?, ?, ?, ?, ?, ?, ?, @success)")
             .bind(user._uid)
             .bind(user._email)
             .bind(user._password)
             .bind(ENCRYPTION_KEY)
+			.bind(user._birth.empty() ? nullptr : user._birth)
+			.bind(user._sex.empty() ? nullptr : user._sex)
+			.bind(user._avatar.empty() ? nullptr : user._avatar.data(), user._avatar.size())
             .execute();
 
         auto statusResult = conn->sql("SELECT @success").execute();
@@ -110,16 +116,19 @@ std::unique_ptr<UserInfo> UserDAO::Search(const std::string& uid)
         if (!found) {
             spdlog::warn("[UserDAO] User not found: uid={}", uid);
             ReleaseConnection(std::move(conn));
-            return nullptr; // ÓÃ»§Î´ÕÒµ½
+            return nullptr; // ç”¨æˆ·æœªæ‰¾åˆ°
         }
 
         auto row = result.fetchOne();
         if (row) {
             auto userInfo = std::make_unique<UserInfo>(
-                row[2].get<std::string>(),  // name
-                row[3].get<std::string>(),  // password (ÒÑ½âÃÜ)
+                row[0].get<std::string>(),  // uid
                 row[1].get<std::string>(),  // email
-                row[0].get<std::string>()   // uid
+                row[2].get<std::string>(),  // name
+                row[3].get<std::string>(),  // password (å·²è§£å¯†)
+                row[4].isNull() ? "" : row[4].get<std::string>(),// birth
+                row[6].isNull() ? std::vector<char>() : std::vector<char>(row[6].getRawBytes().begin(), row[6].getRawBytes().end()), //avatar
+                row[5].isNull() ? "" : row[5].get<std::string>() //sex
             );
             spdlog::info("[UserDAO] User found: uid={}, email={}", userInfo->_uid, userInfo->_email);
             ReleaseConnection(std::move(conn));

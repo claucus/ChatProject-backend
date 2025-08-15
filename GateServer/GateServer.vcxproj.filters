@@ -72,6 +72,9 @@
     <ClInclude Include="StatusGrpcClient.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Defer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IOContextPool.cpp">

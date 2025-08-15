@@ -1,4 +1,4 @@
-#include "MySQLManager.h"
+﻿#include "MySQLManager.h"
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <random>

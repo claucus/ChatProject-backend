@@ -129,6 +129,7 @@
     <ClInclude Include="BaseDAO.h" />
     <ClInclude Include="ConfigManager.h" />
     <ClInclude Include="CServer.h" />
+    <ClInclude Include="Defer.h" />
     <ClInclude Include="HttpConnection.h" />
     <ClInclude Include="IOContextPool.h" />
     <ClInclude Include="LogicSystem.h" />

@@ -1,4 +1,4 @@
-#include "const.h"
+﻿#include "const.h"
 #include "HttpConnection.h"
 #include "LogicSystem.h"
 #include "RedisConPool.h"
@@ -9,6 +9,11 @@
 #include <json/json.h>
 #include <json/reader.h>
 #include <json/value.h>
+#include "Defer.h"
+
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+
 
 bool LogicSystem::HandleGet(std::string path, std::shared_ptr<HttpConnection> con)
 {
@@ -48,20 +53,6 @@ LogicSystem::LogicSystem()
 {
     spdlog::info("[LogicSystem] Initializing LogicSystem and registering HTTP handlers");
 
-    RegisterGet(
-        "/getTest",
-        [](std::shared_ptr<HttpConnection> connection) {
-            spdlog::info("[LogicSystem] Handling /getTest GET request");
-            boost::beast::ostream(connection->_response.body()) << "receive get_text message" << std::endl;
-            size_t i = 0;
-            for (auto& node : connection->_getParams) {
-                i++;
-                boost::beast::ostream(connection->_response.body()) << "param " << i << ", key is " << node.first;
-                boost::beast::ostream(connection->_response.body()) << ", value is " << node.second << std::endl;
-            }
-        }
-    );
-
     RegisterPost(
         "/postVerifyCode",
         [](std::shared_ptr<HttpConnection> connection) {
@@ -71,29 +62,30 @@ LogicSystem::LogicSystem()
 
             connection->_response.set(boost::beast::http::field::content_type, "text/json");
 
-            Json::Value root;
-            Json::Reader reader;
-            Json::Value srcRoot;
+            json root;
 
-            bool parseSuccess = reader.parse(bodyString, srcRoot);
-
-            if (!parseSuccess) {
-                spdlog::warn("[LogicSystem] Failed to parse JSON in /postVerifyCode");
-                root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
-                std::string jsonString = root.toStyledString();
+            defer{
+                std::string jsonString = root.dump(4);
                 boost::beast::ostream(connection->_response.body()) << jsonString;
                 return true;
-            }
-            auto email = srcRoot["email"].asString();
-            spdlog::info("[LogicSystem] Requesting verify code for email: {}", email);
-            auto response = VerifyGrpcClient::GetInstance()->GetVerifyCode(email);
+            };
+                
 
-            root["verifyCode"] = RedisConPool::GetInstance().get(CODE_PREFIX + email).value();
-            root["error"] = response.error();
-            root["email"] = srcRoot["email"];
-            std::string jsonString = root.toStyledString();
-            boost::beast::ostream(connection->_response.body()) << jsonString;
-            return true;
+            try {
+                auto src = json::parse(bodyString);
+
+                std::string email = src["email"].get<std::string>();
+				spdlog::info("[LogicSystem] Requesting verify code for email: {}", email);
+				auto response = VerifyGrpcClient::GetInstance()->GetVerifyCode(email);
+
+                root["error"] = response.error();
+                root["email"] = email;
+				root["verifyCode"] = RedisConPool::GetInstance().get(CODE_PREFIX + email).value();
+            }
+            catch (const json::parse_error& e) {
+				spdlog::warn("[LogicSystem] Failed to parse JSON in /postVerifyCode: {}",e.what());
+				root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
+            }
         }
     );
 
@@ -105,196 +97,165 @@ LogicSystem::LogicSystem()
             spdlog::debug("[LogicSystem] Received body: {}", bodyString);
 
             connection->_response.set(boost::beast::http::field::content_type, "text/json");
-
-            Json::Value root;
-            Json::Reader reader;
-            Json::Value srcRoot;
-
-            bool parseSuccess = reader.parse(bodyString, srcRoot);
-
-            if (!parseSuccess) {
-                spdlog::warn("[LogicSystem] Failed to parse JSON in /userRegister");
-                root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
-                std::string jsonString = root.toStyledString();
-                boost::beast::ostream(connection->_response.body()) << jsonString;
+            
+            json root;
+            defer{
+                std::string jsonString = root.dump(4);
+				boost::beast::ostream(connection->_response.body()) << jsonString;
                 return true;
-            }
+            };
 
-            auto email = srcRoot["email"].asString();
-            auto username = srcRoot["username"].asString();
-            auto password = srcRoot["password"].asString();
-            auto verifyCode = srcRoot["verifyCode"].asString();
+			try {
+				auto src = json::parse(bodyString);
 
-            auto b_verifyCode = RedisConPool::GetInstance().get(CODE_PREFIX + email).value();
+                std::string email = src["email"].get<std::string>();
+                std::string username = src["username"].get<std::string>();
+                std::string password = src["password"].get<std::string>();
+                std::string verifyCode = src["verifyCode"].get<std::string>();
 
-            if (b_verifyCode.empty()) {
-                spdlog::warn("[LogicSystem] Verify code timeout for email: {}", email);
-                root["error"] = static_cast<int>(RegisterResponseCodes::VERIFY_CODE_TIMEOUT);
-                std::string jsonString = root.toStyledString();
-                boost::beast::ostream(connection->_response.body()) << jsonString;
-                return true;
-            }
+                auto b_verifyCode = RedisConPool::GetInstance().get(CODE_PREFIX + email).value();
 
-            if (verifyCode != b_verifyCode) {
-                spdlog::warn("[LogicSystem] Verify code mismatch for email: {}", email);
-                root["error"] = static_cast<int>(RegisterResponseCodes::VERIFY_CODE_ERROR);
-                std::string jsonString = root.toStyledString();
-                boost::beast::ostream(connection->_response.body()) << jsonString;
-                return true;
-            }
+                if (b_verifyCode.empty()) {
+					spdlog::warn("[LogicSystem] Verify code timeout for email: {}", email);
+					root["error"] = static_cast<int>(RegisterResponseCodes::VERIFY_CODE_TIMEOUT);
+                }
 
-            std::string uid = "";
-            auto registerUser = UserInfo(username, password, email, uid);
-            auto verifyResponse = MySQLManager::GetInstance()->RegisterUser(registerUser);
+                if (verifyCode != b_verifyCode) {
+					spdlog::warn("[LogicSystem] Verify code mismatch for email: {}", email);
+					root["error"] = static_cast<int>(RegisterResponseCodes::VERIFY_CODE_ERROR);
+                }
+                
+                std::string uid = "";
+                auto registerUser = UserInfo(uid, email, username, password);
+                auto verifyResponse = MySQLManager::GetInstance()->RegisterUser(registerUser);
 
-            if (verifyResponse == false) {
-                spdlog::warn("[LogicSystem] User already exists: {}", email);
-                root["error"] = static_cast<int>(RegisterResponseCodes::USER_EXISTS);
-                std::string jsonString = root.toStyledString();
-                boost::beast::ostream(connection->_response.body()) << jsonString;
-                return true;
-            }
+                if (!verifyResponse) {
+					spdlog::warn("[LogicSystem] User already exists: {}", email);
+					root["error"] = static_cast<int>(RegisterResponseCodes::USER_EXISTS);
+                }
 
-            spdlog::info("[LogicSystem] User registered successfully: {}", email);
-            root["error"] = static_cast<int>(RegisterResponseCodes::REGISTER_SUCCESS);
-            root["uid"] = registerUser._uid;
-            root["username"] = registerUser._name;
-            root["email"] = registerUser._email;
-            root["password"] = registerUser._password;
-            root["verifyCode"] = verifyCode;
-            std::string jsonString = root.toStyledString();
-            boost::beast::ostream(connection->_response.body()) << jsonString;
-            return true;
+				spdlog::info("[LogicSystem] User registered successfully: {}", email);
+				root["error"] = static_cast<int>(RegisterResponseCodes::REGISTER_SUCCESS);
+				root["uid"] = registerUser._uid;
+				root["username"] = registerUser._username;
+				root["email"] = registerUser._email;
+				root["password"] = registerUser._password;
+				root["verifyCode"] = verifyCode;
+
+			}
+			catch (const json::parse_error& e) {
+				spdlog::warn("[LogicSystem] Failed to parse JSON in /userRegister: {}", e.what());
+				root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
+			}
         }
     );
 
-    RegisterPost(
-        "/resetPassword",
-        [](std::shared_ptr<HttpConnection> connection) {
-            spdlog::info("[LogicSystem] Handling /resetPassword POST request");
-            auto bodyString = boost::beast::buffers_to_string(connection->_request.body().data());
-            spdlog::debug("[LogicSystem] Received body: {}", bodyString);
+	RegisterPost(
+		"/resetPassword",
+		[](std::shared_ptr<HttpConnection> connection) {
+			spdlog::info("[LogicSystem] Handling /resetPassword POST request");
+			auto bodyString = boost::beast::buffers_to_string(connection->_request.body().data());
+			spdlog::debug("[LogicSystem] Received body: {}", bodyString);
 
-            connection->_response.set(boost::beast::http::field::content_type, "text/json");
+			connection->_response.set(boost::beast::http::field::content_type, "text/json");
 
-            Json::Value root;
-            Json::Reader reader;
-            Json::Value srcRoot;
+            json root;
 
-            bool parseSuccess = reader.parse(bodyString, srcRoot);
-
-            if (!parseSuccess) {
-                spdlog::warn("[LogicSystem] Failed to parse JSON in /resetPassword");
-                root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
-                std::string jsonString = root.toStyledString();
+            defer{
+                std::string jsonString = root.dump(4);
                 boost::beast::ostream(connection->_response.body()) << jsonString;
                 return true;
+            };
+
+            try {
+                auto src = json::parse(bodyString);
+
+                std::string uid = src["uid"].get<std::string>();
+                std::string email = src["email"].get<std::string>();
+                std::string newPassword = src["new_password"].get<std::string>();
+                std::string verifyCode = src["verify_code"].get<std::string>();
+
+                auto b_verifyCode = RedisConPool::GetInstance().get(CODE_PREFIX + email).value();
+
+                if (b_verifyCode.empty()) {
+					spdlog::warn("[LogicSystem] Verify code timeout for email: {}", email);
+					root["error"] = static_cast<int>(ResetResponseCodes::VERIFY_CODE_TIMEOUT);
+                }
+
+                if (verifyCode != b_verifyCode) {
+					spdlog::warn("[LogicSystem] Verify code mismatch for email: {}", email);
+					root["error"] = static_cast<int>(ResetResponseCodes::VERIFY_CODE_ERROR);
+                }
+
+                auto resetUser = UserInfo(uid,email,"",newPassword);
+                auto resetResponse = MySQLManager::GetInstance()->ResetPassword(resetUser);
+
+                if (!resetResponse) {
+					spdlog::warn("[LogicSystem] User not exists for reset: {}", email);
+					root["error"] = static_cast<int>(ResetResponseCodes::USER_NOT_EXISTS);
+                }
+                spdlog::info("[LogicSystem] Password reset successful for user: {}", email);
+				root["error"] = static_cast<int>(ResetResponseCodes::RESET_SUCCESS);
+				root["uid"] = resetUser._uid;
+				root["email"] = resetUser._email;
+				root["password"] = resetUser._password;
             }
-
-            auto uid = srcRoot["uuid"].asString();
-            auto email = srcRoot["email"].asString();
-            auto newPassword = srcRoot["newPassword"].asString();
-            auto verifyCode = srcRoot["verifyCode"].asString();
-
-            auto b_verifyCode = RedisConPool::GetInstance().get(CODE_PREFIX + email).value();
-
-            if (b_verifyCode.empty()) {
-                spdlog::warn("[LogicSystem] Verify code timeout for email: {}", email);
-                root["error"] = static_cast<int>(ResetResponseCodes::VERIFY_CODE_TIMEOUT);
-                std::string jsonString = root.toStyledString();
-                boost::beast::ostream(connection->_response.body()) << jsonString;
-                return true;
+            catch (const json::parse_error& e) {
+				spdlog::warn("[LogicSystem] Failed to parse JSON in /resetPassword: {}",e.what());
+				root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
             }
+		}
+	);
 
-            if (verifyCode != b_verifyCode) {
-                spdlog::warn("[LogicSystem] Verify code mismatch for email: {}", email);
-                root["error"] = static_cast<int>(ResetResponseCodes::VERIFY_CODE_ERROR);
-                std::string jsonString = root.toStyledString();
-                boost::beast::ostream(connection->_response.body()) << jsonString;
-                return true;
+	RegisterPost(
+		"/userLogin",
+		[](std::shared_ptr<HttpConnection> connection) {
+			spdlog::info("[LogicSystem] Handling /userLogin POST request");
+			auto bodyString = boost::beast::buffers_to_string(connection->_request.body().data());
+			spdlog::debug("[LogicSystem] Received body: {}", bodyString);
+
+			connection->_response.set(boost::beast::http::field::content_type, "text/json");
+
+            json root;
+            defer{
+                std::string jsonString = root.dump(4);
+			    boost::beast::ostream(connection->_response.body()) << jsonString;
+			    return true;
+            };
+            try {
+                auto src = json::parse(bodyString);
+
+                std::string uid = root["uid"].get<std::string>();
+                std::string email = root["email"].get<std::string>();
+                std::string password = root["password"].get<std::string>();
+
+                auto loginUser = UserInfo(uid, email, "", password);
+				auto loginResponse = MySQLManager::GetInstance()->UserLogin(loginUser);
+
+				if (loginResponse == false) {
+					spdlog::warn("[LogicSystem] Login failed for user: {}", email);
+					root["error"] = static_cast<int>(LoginResponseCodes::LOGIN_ERROR);
+				}
+
+				auto reply = StatusGrpcClient::GetInstance()->GetChatServer(loginUser._uid);
+				if (reply.error()) {
+					spdlog::error("[LogicSystem] gRPC get chat server failed for uid: {}", loginUser._uid, reply.error());
+					root["error"] = static_cast<int>(LoginResponseCodes::RPC_GET_FAILED);
+				}
+
+				spdlog::info("[LogicSystem] Login successful for user: {}", email);
+				root["error"] = static_cast<int>(LoginResponseCodes::LOGIN_SUCCESS);
+				root["uid"] = loginUser._uid;
+				root["email"] = loginUser._email;
+				root["token"] = reply.token();
+				root["host"] = reply.host();
+				root["port"] = reply.port();
+
             }
-
-            auto resetUser = UserInfo("", newPassword, email, uid);
-            auto resetResponse = MySQLManager::GetInstance()->ResetPassword(resetUser);
-
-            if (resetResponse == false) {
-                spdlog::warn("[LogicSystem] User not exists for reset: {}", email);
-                root["error"] = static_cast<int>(ResetResponseCodes::USER_NOT_EXISTS);
-                std::string jsonString = root.toStyledString();
-                boost::beast::ostream(connection->_response.body()) << jsonString;
-                return true;
+            catch (const json::parse_error& e) {
+				spdlog::warn("[LogicSystem] Failed to parse JSON in /resetPassword: {}",e.what());
+				root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
             }
-
-            spdlog::info("[LogicSystem] Password reset successful for user: {}", email);
-            root["error"] = static_cast<int>(ResetResponseCodes::RESET_SUCCESS);
-            root["uid"] = resetUser._uid;
-            root["email"] = resetUser._email;
-            root["password"] = resetUser._password;
-
-            std::string jsonString = root.toStyledString();
-            boost::beast::ostream(connection->_response.body()) << jsonString;
-            return true;
-        }
-    );
-
-    RegisterPost(
-        "/userLogin",
-        [](std::shared_ptr<HttpConnection> connection) {
-            spdlog::info("[LogicSystem] Handling /userLogin POST request");
-            auto bodyString = boost::beast::buffers_to_string(connection->_request.body().data());
-            spdlog::debug("[LogicSystem] Received body: {}", bodyString);
-
-            connection->_response.set(boost::beast::http::field::content_type, "text/json");
-
-            Json::Value root;
-            Json::Reader reader;
-            Json::Value srcRoot;
-
-            bool parseSuccess = reader.parse(bodyString, srcRoot);
-
-            if (!parseSuccess) {
-                spdlog::warn("[LogicSystem] Failed to parse JSON in /userLogin");
-                root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
-                std::string jsonString = root.toStyledString();
-                boost::beast::ostream(connection->_response.body()) << jsonString;
-                return true;
-            }
-
-            auto uid = srcRoot["uuid"].asString();
-            auto email = srcRoot["email"].asString();
-            auto password = srcRoot["password"].asString();
-
-            auto loginUser = UserInfo("", password, email, uid);
-            auto loginResponse = MySQLManager::GetInstance()->UserLogin(loginUser);
-
-            if (loginResponse == false) {
-                spdlog::warn("[LogicSystem] Login failed for user: {}", email);
-                root["error"] = static_cast<int>(LoginResponseCodes::LOGIN_ERROR);
-                std::string jsonString = root.toStyledString();
-                boost::beast::ostream(connection->_response.body()) << jsonString;
-                return true;
-            }
-
-            auto reply = StatusGrpcClient::GetInstance()->GetChatServer(loginUser._uid);
-            if (reply.error()) {
-                spdlog::error("[LogicSystem] gRPC get chat server failed for uid: {}", loginUser._uid, reply.error());
-                root["error"] = static_cast<int>(LoginResponseCodes::RPC_GET_FAILED);
-                std::string jsonString = root.toStyledString();
-                boost::beast::ostream(connection->_response.body()) << jsonString;
-                return true;
-            }
-
-            spdlog::info("[LogicSystem] Login successful for user: {}", email);
-            root["error"] = static_cast<int>(LoginResponseCodes::LOGIN_SUCCESS);
-            root["uid"] = loginUser._uid;
-            root["email"] = loginUser._email;
-            root["token"] = reply.token();
-            root["host"] = reply.host();
-            root["port"] = reply.port();
-
-            std::string jsonString = root.toStyledString();
-            boost::beast::ostream(connection->_response.body()) << jsonString;
-            return true;
-        }
-    );
+		}
+	);
 }
