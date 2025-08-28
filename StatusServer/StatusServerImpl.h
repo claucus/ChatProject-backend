@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <grpcpp/grpcpp.h>
 #include "message.grpc.pb.h"
 #include <unordered_map>
@@ -49,8 +49,6 @@ private:
 private:
 	std::unordered_map <std::string, ChatServer> _servers;
 	std::mutex _serverMutex;
-
-	std::unordered_map<std::string, std::string> _tokens;
 	std::mutex _tokenMutex;
 };
 

@@ -1,4 +1,4 @@
-#include "StatusServerImpl.h"
+ï»¿#include "StatusServerImpl.h"
 #include "ConfigManager.h"
 #include "const.h"
 #include "RedisConPool.h"
@@ -60,7 +60,7 @@ StatusServerImpl::StatusServerImpl()
 void StatusServerImpl::insertToken(std::string uid, std::string token)
 {
     std::lock_guard <std::mutex> lock(_tokenMutex);
-    _tokens[uid] = token;
+    RedisConPool::GetInstance().set(ChatServiceConstant::USER_TOKEN_PREFIX + uid, token);
     spdlog::debug("[StatusServer] Token inserted for UID: {}", uid);
 }
 
@@ -71,7 +71,7 @@ grpc::Status StatusServerImpl::GetChatServer(grpc::ServerContext* context,
     
     const auto& server = GetChatServer();
     
-    // ÉèÖÃÏìÓ¦
+    // è®¾ç½®å“åº”
     response->set_host(server.host);
     response->set_port(server.port);
     response->set_error(static_cast<int>(ErrorCodes::SUCCESS));
@@ -134,20 +134,23 @@ grpc::Status StatusServerImpl::Login(grpc::ServerContext* context,
 
     std::lock_guard<std::mutex> lock(_tokenMutex);
 
-    auto iter = _tokens.find(uid);
-    if (iter == _tokens.end()) {
-        spdlog::warn("[StatusServer] Login failed - Invalid UID: {}", uid);
+    auto token_value = RedisConPool::GetInstance().get(ChatServiceConstant::USER_TOKEN_PREFIX + uid).value();
+
+    if (token_value.empty()) {
         response->set_error(static_cast<int>(ErrorCodes::UID_INVALID));
-    }
-    else if (iter->second != token) {
-        spdlog::warn("[StatusServer] Login failed - Invalid token for UID: {}", uid);
-        response->set_error(static_cast<int>(ErrorCodes::TOKEN_INVALID));
-    }
-    else {
-        spdlog::info("[StatusServer] Login successful for UID: {}", uid);
-        response->set_error(static_cast<int>(ErrorCodes::SUCCESS));
+        spdlog::warn("[StatusServer] Login failed - Invalid UID: {}", uid);
+        return grpc::Status::OK;
     }
 
+    if (token_value != token) {
+        response->set_error(static_cast<int>(ErrorCodes::TOKEN_INVALID));
+		spdlog::warn("[StatusServer] Login failed - Invalid token for UID: {}", uid);
+        return grpc::Status::OK;
+    }
+
+    spdlog::info("[StatusServer] Login successful for UID: {}", uid);
+
+    response->set_error(static_cast<int>(ErrorCodes::SUCCESS));
     response->set_uid(uid);
     response->set_token(token);
     
