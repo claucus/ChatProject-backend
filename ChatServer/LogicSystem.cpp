@@ -7,9 +7,8 @@
 #include "Defer.h"
 
 #include <spdlog/spdlog.h>
-
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
+#include <chrono>
+#include "FriendGrpcClient.h"
 
 LogicSystem::~LogicSystem()
 {
@@ -104,13 +103,21 @@ void LogicSystem::RegisterCallBack()
             std::placeholders::_3);
     spdlog::info("[LogicSystem] Registered login handler for message ID: {}", id);
 
+
     id = static_cast<size_t>(MessageID::MESSAGE_GET_SEARCH_USER);
     _funcCallBack[id] = std::bind(&LogicSystem::SearchHandler, this,
             std::placeholders::_1,
             std::placeholders::_2,
             std::placeholders::_3);
+    spdlog::info("[LogicSystem] Registered search handler for message ID: {}", id);
 
-    spdlog::info("[LogicSystem] Registered login handler for message ID: {}", id);
+
+    id = static_cast<size_t>(MessageID::MESSAGE_APPLY_FRIEND);
+    _funcCallBack[id] = std::bind(&LogicSystem::ApplyFriendHandler,this,
+        std::placeholders::_1,
+        std::placeholders::_2,
+        std::placeholders::_3);
+    spdlog::info("[LogicSystem] Registered apply friend handler for message ID: {}", id);
 }
 
 void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData)
@@ -163,6 +170,10 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
         root["username"] = userInfo->_username;
         root["email"] = userInfo->_email;
         root["password"] = userInfo->_password;
+		root["birth"] = userInfo->_birth;
+		root["avatar"] = userInfo->_avatar;
+		root["sex"] = userInfo->_sex;
+        root["token"] = token;
 
 
 		auto serverName = ConfigManager::GetInstance().getValue("SelfServer", "name");
@@ -197,7 +208,131 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
 
 void LogicSystem::SearchHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData)
 {
+    spdlog::info("[LogicSystem] Processing search request...");
 
+    json root;
+    defer{
+        std::string returnStr = root.dump(4);
+        session->Send(returnStr, static_cast<size_t>(MessageID::MESSAGE_GET_SEARCH_USER_RESPONSE));
+    };
+
+    try {
+        auto src = json::parse(messageData);
+
+        std::string uid = src["uid"].get<std::string>();
+        std::string selfUid = src["self"].get<std::string>();
+
+        spdlog::info("[LogicSystem] Search attempt - UID: {}", uid);
+
+        root["error"] = static_cast<int>(ErrorCodes::SUCCESS);
+        root["users"] = json::array();
+
+        auto users = MySQLManager::GetInstance()->FuzzySearchUsers(selfUid, uid);
+
+        for (const auto& user : users) {
+            json user_json;
+            user_json["uid"] = user->_uid;
+            user_json["username"] = user->_username;
+            user_json["avatar"] = user->_avatar;
+            user_json["add_status"] = user->_status;
+
+            root["users"].push_back(user_json);
+
+            std::string baseKey = ChatServiceConstant::USER_FRIEND_STATUS + user->_uid;
+            RedisConPool::GetInstance().set(baseKey, user_json.dump(4));
+        }
+
+        if (root["users"].empty()) {
+            root["error"] = static_cast<int>(ErrorCodes::UID_INVALID);
+        }
+       
+    }
+    catch (const json::parse_error& e) {
+        spdlog::warn("[LogicSystem] Failed to parse JSON in SearchHandler: {}", e.what());
+        root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
+    }
+}
+
+void LogicSystem::ApplyFriendHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData)
+{
+	spdlog::info("[LogicSystem] Processing Apply Friend request...");
+
+	json root;
+	defer{
+		std::string returnStr = root.dump(4);
+		session->Send(returnStr, static_cast<size_t>(MessageID::MESSAGE_APPLY_FRIEND_RESPONSE));
+	};
+
+    try {
+        auto src = json::parse(messageData);
+
+        std::string to_uid = src["uid"].get<std::string>();
+        std::string from_uid = src["self"].get<std::string>();
+        std::string group_other = src["grouping"].get<std::string>();
+        std::string comments = src["comments"].get<std::string>();
+        auto now_time = std::chrono::system_clock::now().time_since_epoch();
+
+
+        spdlog::info("[LogicSystem] Friend attempt - UID: {}", from_uid);
+
+        root["error"] = static_cast<int>(ErrorCodes::SUCCESS);
+
+        auto relation = FriendRelation(from_uid, to_uid, static_cast<int>(AddStatusCodes::NotConsent), group_other);
+
+        auto success = MySQLManager::GetInstance()->AddFriend(relation);
+        if (!success) {
+            return;
+        }
+
+
+        std::string ipKey = ChatServiceConstant::USER_IP_PREFIX + to_uid;
+        auto to_ip_value = RedisConPool::GetInstance().get(ipKey).value();
+        if (to_ip_value.empty()) {
+            return;
+        }
+
+
+        auto& cfg = ConfigManager::GetInstance();
+        auto selfServer = cfg["SelfServer"]["name"];
+
+        std::string baseKey = ChatServiceConstant::USER_INFO_PREFIX + from_uid;
+        auto userInfo = std::make_shared<UserInfo>();
+        bool userFind = GetUserInfo(baseKey, from_uid, userInfo);
+
+        if (to_ip_value == selfServer) {
+            auto session = UserManager::GetInstance()->GetSession(to_uid);
+            
+            if (session) {
+                json notify;
+                notify["error"] = static_cast<int>(ErrorCodes::SUCCESS);
+                notify["comments"] = comments;
+                notify["uid"] = from_uid;
+                notify["time"] = std::chrono::duration_cast<std::chrono::milliseconds>(now_time).count();
+                
+                if (userFind) {
+                    notify["avatar"] = userInfo->_avatar;
+                }
+
+                session->Send(notify.dump(4), static_cast<int>(MessageID::MESSAGE_NOTIFY_ADD_FRIEND));
+            }
+            return;
+        }
+
+        message::FriendRequest request;
+        request.set_applicant(from_uid);
+        request.set_recipient(to_uid);
+        request.set_message(comments);
+        request.set_time(std::chrono::duration_cast<std::chrono::milliseconds>(now_time).count());
+        if (userFind) {
+            request.set_avatar(userInfo->_avatar);
+        }
+
+        FriendGrpcClient::GetInstance()->SendFriend(to_ip_value,request);
+	}
+	catch (const json::parse_error& e) {
+		spdlog::warn("[LogicSystem] Failed to parse JSON in ApplyFriendHandler: {}", e.what());
+        root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
+	}
 }
 
 bool LogicSystem::GetUserInfo(std::string baseKey, std::string uid, std::shared_ptr<UserInfo>& userInfo)
@@ -235,6 +370,9 @@ bool LogicSystem::GetUserInfo(std::string baseKey, std::string uid, std::shared_
         root["username"] = userInfo->_username;
         root["email"] = userInfo->_email;
         root["password"] = userInfo->_password;
+        root["birth"] = userInfo->_birth;
+        root["avatar"] = userInfo->_avatar;
+        root["sex"] = userInfo->_sex;
 
         std::string redisString = root.dump(4);
 		RedisConPool::GetInstance().set(baseKey, redisString);

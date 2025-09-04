@@ -72,12 +72,6 @@
     <ClInclude Include="UserInfo.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ChatGrpcClient.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ChatServerImpl.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="RedisConPool.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -85,6 +79,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Defer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FriendDAO.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FriendGrpcClient.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FriendServerImpl.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -134,16 +137,19 @@
     <ClCompile Include="UserDAO.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ChatGrpcClient.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ChatServerImpl.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="RedisConPool.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="UserManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="FriendDAO.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="FriendGrpcClient.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="FriendServerImpl.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

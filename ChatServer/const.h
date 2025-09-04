@@ -18,6 +18,7 @@ namespace ChatServiceConstant {
 	constexpr auto USER_TOKEN_PREFIX = "user_token_";
 	constexpr auto USER_INFO_PREFIX = "user_info_";
 	constexpr auto USER_IP_PREFIX = "user_ip_";
+	constexpr auto USER_FRIEND_STATUS = "user_friend_status_";
 }
 
 enum class ErrorCodes
@@ -33,5 +34,18 @@ enum class ErrorCodes
 enum class MessageID {
 	MESSAGE_CHAT_LOGIN = 1005,
 	MESSAGE_CHAT_LOGIN_RESPONSE = 1006,
+
 	MESSAGE_GET_SEARCH_USER = 1007,
+	MESSAGE_GET_SEARCH_USER_RESPONSE = 1008,
+
+	MESSAGE_APPLY_FRIEND = 1009,
+	MESSAGE_APPLY_FRIEND_RESPONSE = 1010,
+
+	MESSAGE_NOTIFY_ADD_FRIEND = 1011,
+};
+
+enum class AddStatusCodes {
+	NotFriend,
+	NotConsent,
+	MutualFriend,
 };

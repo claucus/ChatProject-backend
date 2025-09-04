@@ -127,13 +127,14 @@
   <ItemGroup>
     <ClInclude Include="BaseDAO.h" />
     <ClInclude Include="BaseNode.h" />
-    <ClInclude Include="ChatGrpcClient.h" />
-    <ClInclude Include="ChatServerImpl.h" />
+    <ClInclude Include="FriendGrpcClient.h" />
     <ClInclude Include="ConfigManager.h" />
     <ClInclude Include="const.h" />
     <ClInclude Include="CServer.h" />
     <ClInclude Include="CSession.h" />
     <ClInclude Include="Defer.h" />
+    <ClInclude Include="FriendDAO.h" />
+    <ClInclude Include="FriendServerImpl.h" />
     <ClInclude Include="GrpcPool.h" />
     <ClInclude Include="IOContextPool.h" />
     <ClInclude Include="LogicNode.h" />
@@ -152,11 +153,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseNode.cpp" />
-    <ClCompile Include="ChatGrpcClient.cpp" />
-    <ClCompile Include="ChatServerImpl.cpp" />
+    <ClCompile Include="FriendGrpcClient.cpp" />
     <ClCompile Include="ConfigManager.cpp" />
     <ClCompile Include="CServer.cpp" />
     <ClCompile Include="CSession.cpp" />
+    <ClCompile Include="FriendDAO.cpp" />
+    <ClCompile Include="FriendServerImpl.cpp" />
     <ClCompile Include="IOContextPool.cpp" />
     <ClCompile Include="LogicNode.cpp" />
     <ClCompile Include="LogicSystem.cpp" />

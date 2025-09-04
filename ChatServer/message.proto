@@ -43,77 +43,37 @@ message LoginResponse{
     string token = 3;
 }
 
-service ChatService{
-    rpc SendMessage(ChatMessage) returns (SendMessageResponse) {}
-    rpc ReceiveMessages(ReceiveMessagesRequest) returns (stream ChatMessage) {}
-    rpc AddFriend(AddFriendRequest) returns (AddFriendResponse) {}
-    rpc NotifyAddFriend(NotifyAddFriendRequest) returns (NotifyAddFriendResponse) {}
-    rpc GetFriendList(GetFriendListRequest) returns (GetFriendListResponse) {}
+
+service FriendService{
+    rpc SendFriend(FriendRequest) returns (FriendResponse) {}
+    rpc HandleFriend(FriendApprovalRequest) returns (FriendApprovalResponse) {}
 }
 
-enum MessageType {
-    TEXT = 0;
-    IMAGE = 1;
-    FILE = 2;
-}
 
-message ChatMessage{
-    string message_id = 1;
-    string from_uid = 2;
-    string to_uid = 3;
-    string content = 4;
-    int64 timestamp = 5;
-    MessageType type = 6;
-}
-
-message SendMessageResponse{
-    int32 error = 1;
-    string message_id = 2;
-    int64 timestamp = 3;
-}
-
-message ReceiveMessagesRequest{
-    string uid = 1;
-}
-
-message AddFriendRequest{
-    string from_uid = 1;
-    string to_uid = 2;
-    string message = 3;
-    int64 timestamp = 4;
-}
-
-message AddFriendResponse{
-    int32 error = 1;
-    string request_id = 2;
-}
-
-message NotifyAddFriendRequest{
-    string request_id = 1;
-    string from_uid = 2;
-    string to_uid = 3;
-    bool accpect = 4;
-}
-
-message NotifyAddFriendResponse{
-    int32 error = 1;
-    string request_id = 2;
-    string from_uid = 3;
-    string to_uid = 4;
-}
-
-message GetFriendListRequest{
-    string uid = 1;
-}
-
-message GetFriendListResponse{
-    int32 error = 1;
-    repeated FriendInfo friends = 2;
-}
-
-message FriendInfo {
-    string uid = 1;
-    string username = 2;
+message FriendRequest{
+    string applicant = 1;
+    string recipient = 2;
     string avatar = 3;
-    string status = 4; // e.g., online, offline, busy
+    string message = 4;
+    int64 time = 5;
+}
+
+message FriendResponse{
+    int32 error = 1;
+    string applicant = 2;
+    string recipient = 3;
+}
+
+message FriendApprovalRequest{
+    string request_id = 1;
+    string applicant = 2;
+    string recipient = 3;
+    bool is_approved = 4;
+    int64 approved_time = 5;
+}
+
+message FriendApprovalResponse{
+    int32 error = 1;
+    string applicant = 2;
+    string recipient = 3;
 }

@@ -13,6 +13,8 @@
 #include <thread>
 #include <unordered_map>
 
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 using FunCallBack = std::function<void(std::shared_ptr<CSession>, const size_t& messageId, const std::string& messageData)>;
 
@@ -29,6 +31,8 @@ private:
 	void RegisterCallBack();
 	void LoginHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData);
 	void SearchHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData);
+	void ApplyFriendHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData);
+
 	bool GetUserInfo(std::string baseKey, std::string uid, std::shared_ptr<UserInfo>& userInfo);
 	
 private:

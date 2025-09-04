@@ -1,8 +1,8 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include "ConfigManager.h"
 #include "IOContextPool.h"
 #include "CServer.h"
-#include "ChatServerImpl.h"
+#include "FriendServerImpl.h"
 #include "RedisConPool.h"
 #include "const.h"
 #include <spdlog/spdlog.h>
@@ -11,40 +11,40 @@
 void initServerLogger()
 {
 	try {
-		// ´´½¨¶à¸öÈÕÖ¾½ÓÊÕÆ÷
+		// åˆ›å»ºå¤šä¸ªæ—¥å¿—æ¥æ”¶å™¨
 		std::vector<spdlog::sink_ptr> sinks;
 
-		// ¿ØÖÆÌ¨Êä³ö
+		// æ§åˆ¶å°è¾“å‡º
 		auto console_sink = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
 		console_sink->set_level(spdlog::level::debug);
 		sinks.push_back(console_sink);
 
-		// ÎÄ¼şÊä³ö£¨°´´óĞ¡ÂÖ×ª£©
+		// æ–‡ä»¶è¾“å‡ºï¼ˆæŒ‰å¤§å°è½®è½¬ï¼‰
 		auto rotating_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-			"logs/server.log",    // »ù´¡ÎÄ¼şÃû
-			1024 * 1024 * 5,     // 5MB ÎÄ¼ş´óĞ¡
-			3                     // ±£Áô3¸öÀúÊ·ÎÄ¼ş
+			"logs/server.log",    // åŸºç¡€æ–‡ä»¶å
+			1024 * 1024 * 5,     // 5MB æ–‡ä»¶å¤§å°
+			3                     // ä¿ç•™3ä¸ªå†å²æ–‡ä»¶
 		);
 		rotating_sink->set_level(spdlog::level::trace);
 		sinks.push_back(rotating_sink);
 
-		// ´´½¨¸´ºÏlogger
+		// åˆ›å»ºå¤åˆlogger
 		auto logger = std::make_shared<spdlog::logger>("server_logger", sinks.begin(), sinks.end());
 
-		// ÉèÖÃÈÕÖ¾¸ñÊ½
+		// è®¾ç½®æ—¥å¿—æ ¼å¼
 		logger->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [thread %t] %v");
 
-		// ÉèÖÃÈ«¾Ölogger
+		// è®¾ç½®å…¨å±€logger
 		spdlog::set_default_logger(logger);
 
-		// ÉèÖÃÈÕÖ¾¼¶±ğ£¨¿ÉÒÔÍ¨¹ıÅäÖÃÎÄ¼şÅäÖÃ£©
+		// è®¾ç½®æ—¥å¿—çº§åˆ«ï¼ˆå¯ä»¥é€šè¿‡é…ç½®æ–‡ä»¶é…ç½®ï¼‰
 #ifdef _DEBUG
 		spdlog::set_level(spdlog::level::debug);
 #else
 		spdlog::set_level(spdlog::level::info);
 #endif
 
-		// ´íÎó¼¶±ğÈÕÖ¾Á¢¼´Ë¢ĞÂ
+		// é”™è¯¯çº§åˆ«æ—¥å¿—ç«‹å³åˆ·æ–°
 		spdlog::flush_on(spdlog::level::err);
 		spdlog::info("Logger initialization completed successfully");
 	}
@@ -72,7 +72,7 @@ int main() {
 		spdlog::debug("Configuring gRPC server on address: {}", addr);
 
 
-		ChatServerImpl service;
+		FriendServerImpl service;
 		grpc::ServerBuilder builder;
 		builder.AddListeningPort(addr, grpc::InsecureServerCredentials());
 		builder.RegisterService(&service);
