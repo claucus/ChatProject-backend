@@ -13,27 +13,33 @@ bool MySQLManager::RegisterUser(UserInfo& user)
 		return false;
 	}
 
-	if (user._uid.empty()) {
-		auto a_uuid = boost::uuids::random_generator()();
-		auto uid = boost::uuids::to_string(a_uuid);
-		uid.erase(
-			remove_if(uid.begin(), uid.end(), [](char ch) {return (ch == '-'); }),
-			uid.end()
-		);
-		for (auto& ch : uid) {
-			if (!isdigit(ch)) {
-				ch = ch - 'a';
-				ch = ch + '0';
-                if (ch == '0') {
-                    ch = '1';
-                }
-			}
+    if (user._uid.empty()) {
+
+        auto rnd = [](int x)->int {
+            std::mt19937 mrand(std::random_device{}());
+            return mrand() % x;
+            };
+
+        auto a_uuid = boost::uuids::random_generator()();
+        auto uid = boost::uuids::to_string(a_uuid);
+        uid.erase(
+            remove_if(uid.begin(), uid.end(), [](char ch) {return (ch == '-'); }),
+            uid.end()
+        );
+        for (auto& ch : uid) {
+            if (!isdigit(ch)) {
+                ch = ch - 'a';
+                ch = ch + '0';
+            }
+        }
+
+
+		user._uid = uid.substr(rnd(18), static_cast<std::basic_string<char, std::char_traits<char>, std::allocator<char>>::size_type>(7) + rnd(4));
+
+		if (user._uid.front() == '0') {
+			user._uid.front() += rnd(9) + 1;
 		}
-		auto rnd = [](int x)->int {
-			std::mt19937 mrand(std::random_device{}());
-			return mrand() % x;
-			};
-		user._uid = uid.substr(0, static_cast<std::basic_string<char, std::char_traits<char>, std::allocator<char>>::size_type>(7) + rnd(3));
+
         spdlog::debug("[MySQLManager] Generated new UID for user: {}", user._uid);
 	}
 
@@ -118,4 +124,21 @@ std::unique_ptr<UserInfo> MySQLManager::GetUser(const std::string& uid)
         spdlog::warn("[MySQLManager] User info not found - UID: {}", uid);
     }
     return user;
+}
+
+std::vector <std::shared_ptr<SearchInfo>> MySQLManager::FuzzySearchUsers(const std::string& uid, const std::string& pattern)
+{
+    return _friendDAO.Search(uid, pattern);
+}
+
+bool MySQLManager::AddFriend(FriendRelation& relation)
+{
+    try {
+        auto result = _friendDAO.Insert(relation);
+        return result;
+    }
+    catch (const std::exception& e) {
+        return false;
+    }
+    
 }

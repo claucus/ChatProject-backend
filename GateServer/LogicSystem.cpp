@@ -60,14 +60,12 @@ LogicSystem::LogicSystem()
             connection->_response.set(boost::beast::http::field::content_type, "text/json");
 
             json root;
-
             defer{
                 std::string jsonString = root.dump(4);
                 boost::beast::ostream(connection->_response.body()) << jsonString;
                 return true;
             };
                 
-
             try {
                 auto src = json::parse(bodyString);
 
@@ -77,7 +75,7 @@ LogicSystem::LogicSystem()
 
                 root["error"] = response.error();
                 root["email"] = email;
-				root["verifyCode"] = RedisConPool::GetInstance().get(CODE_PREFIX + email).value();
+				root["verify_code"] = RedisConPool::GetInstance().get(CODE_PREFIX + email).value();
             }
             catch (const json::parse_error& e) {
 				spdlog::warn("[LogicSystem] Failed to parse JSON in /postVerifyCode: {}",e.what());
@@ -103,12 +101,13 @@ LogicSystem::LogicSystem()
             };
 
 			try {
+                spdlog::info("[LogicSystem] Parse Json...");
 				auto src = json::parse(bodyString);
 
                 std::string email = src["email"].get<std::string>();
                 std::string username = src["username"].get<std::string>();
                 std::string password = src["password"].get<std::string>();
-                std::string verifyCode = src["verifyCode"].get<std::string>();
+                std::string verifyCode = src["verify_code"].get<std::string>();
 
                 auto b_verifyCode = RedisConPool::GetInstance().get(CODE_PREFIX + email).value();
 
@@ -122,7 +121,7 @@ LogicSystem::LogicSystem()
 					root["error"] = static_cast<int>(RegisterResponseCodes::VERIFY_CODE_ERROR);
                 }
                 
-                std::string uid = "";
+                std::string uid;
                 auto registerUser = UserInfo(uid, email, username, password);
                 auto verifyResponse = MySQLManager::GetInstance()->RegisterUser(registerUser);
 
@@ -137,7 +136,7 @@ LogicSystem::LogicSystem()
 				root["username"] = registerUser._username;
 				root["email"] = registerUser._email;
 				root["password"] = registerUser._password;
-				root["verifyCode"] = verifyCode;
+				root["verify_code"] = verifyCode;
 
 			}
 			catch (const json::parse_error& e) {
@@ -219,12 +218,13 @@ LogicSystem::LogicSystem()
 			    boost::beast::ostream(connection->_response.body()) << jsonString;
 			    return true;
             };
+
             try {
                 auto src = json::parse(bodyString);
 
-                std::string uid = root["uid"].get<std::string>();
-                std::string email = root["email"].get<std::string>();
-                std::string password = root["password"].get<std::string>();
+                std::string uid = src["uid"].get<std::string>();
+                std::string email = src["email"].get<std::string>();
+                std::string password = src["password"].get<std::string>();
 
                 auto loginUser = UserInfo(uid, email, "", password);
 				auto loginResponse = MySQLManager::GetInstance()->UserLogin(loginUser);
