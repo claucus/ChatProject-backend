@@ -11,8 +11,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChatServer", "..\ChatServer
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StatusServer", "..\StatusServer\StatusServer.vcxproj", "{C311BF59-E7BC-4559-AEEB-07B716E4F2A9}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "awesomeChatProject", "..\..\..\Qt\awesomeChatProject\awesomeChatProject.vcxproj", "{08A645DE-8BAE-3A7E-8FAC-BCF58048AFD2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -45,14 +43,6 @@ Global
 		{C311BF59-E7BC-4559-AEEB-07B716E4F2A9}.Release|x64.Build.0 = Release|x64
 		{C311BF59-E7BC-4559-AEEB-07B716E4F2A9}.Release|x86.ActiveCfg = Release|Win32
 		{C311BF59-E7BC-4559-AEEB-07B716E4F2A9}.Release|x86.Build.0 = Release|Win32
-		{08A645DE-8BAE-3A7E-8FAC-BCF58048AFD2}.Debug|x64.ActiveCfg = Debug|x64
-		{08A645DE-8BAE-3A7E-8FAC-BCF58048AFD2}.Debug|x64.Build.0 = Debug|x64
-		{08A645DE-8BAE-3A7E-8FAC-BCF58048AFD2}.Debug|x86.ActiveCfg = Debug|x64
-		{08A645DE-8BAE-3A7E-8FAC-BCF58048AFD2}.Debug|x86.Build.0 = Debug|x64
-		{08A645DE-8BAE-3A7E-8FAC-BCF58048AFD2}.Release|x64.ActiveCfg = Release|x64
-		{08A645DE-8BAE-3A7E-8FAC-BCF58048AFD2}.Release|x64.Build.0 = Release|x64
-		{08A645DE-8BAE-3A7E-8FAC-BCF58048AFD2}.Release|x86.ActiveCfg = Release|x64
-		{08A645DE-8BAE-3A7E-8FAC-BCF58048AFD2}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
