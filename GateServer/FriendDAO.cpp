@@ -13,12 +13,14 @@ bool FriendDAO::Insert(const FriendRelation& relation)
 
 	try {
 		LOG_INFO("Inserting relationship: uid_a={}, uid_b={}", relation._a_uid, relation._b_uid);
-		auto result = conn->sql("CALL sp_insert_friend(?, ?, ?, ?, ?, @success)")
+		auto result = conn->sql("CALL sp_insert_friend(?, ?, ?, ?, ?, ?, ?, @success)")
 			.bind(relation._a_uid)
 			.bind(relation._b_uid)
 			.bind(relation._status)
-			.bind(relation._group_a.empty() ? "wodehaoyou" : relation._group_a)
-			.bind(relation._group_b.empty() ? "wodehaoyou" : relation._group_b)
+			.bind(relation._group_a.empty() ? "MyFriends" : relation._group_a)
+			.bind(relation._group_b.empty() ? "MyFriends" : relation._group_b)
+			.bind(relation._remark_a.empty() ? relation._a_uid : relation._remark_a)
+			.bind(relation._remark_b.empty() ? relation._b_uid : relation._remark_b)
 			.execute();
 
 		auto statusResult = conn->sql("SELECT @success").execute();
@@ -48,12 +50,14 @@ bool FriendDAO::Update(const FriendRelation& relation)
 
 	try {
 		LOG_INFO("Updating relationship: uid_a={}, uid_b={}", relation._a_uid, relation._b_uid);
-		auto result = conn->sql("CALL sp_update_friend(?, ?, ?, ?, ?, @success)")
+		auto result = conn->sql("CALL sp_update_friend(?, ?, ?, ?, ?, ?, ?, @success)")
 			.bind(relation._a_uid)
 			.bind(relation._b_uid)
 			.bind(relation._status)
-			.bind(relation._group_a.empty() ? "wodehaoyou" : relation._group_a)
-			.bind(relation._group_b.empty() ? "wodehaoyou" : relation._group_b)
+			.bind(relation._group_a.empty() ? "MyFriends" : relation._group_a)
+			.bind(relation._group_b.empty() ? "MyFriends" : relation._group_b)
+			.bind(relation._remark_a.empty() ? relation._a_uid : relation._remark_a)
+			.bind(relation._remark_b.empty() ? relation._b_uid : relation._remark_b)
 			.execute();
 
 		auto statusResult = conn->sql("SELECT @success").execute();
@@ -145,7 +149,9 @@ std::vector<std::shared_ptr<FriendRelation>> FriendDAO::GetUserFriends(const std
 					row[1].get<std::string>(),
 					row[2].get<int>(),
 					row[3].isNull() ? "" : row[3].get<std::string>(),
-					row[4].isNull() ? "" : row[4].get<std::string>()
+					row[4].isNull() ? "" : row[4].get<std::string>(),
+					row[5].isNull() ? "" : row[5].get<std::string>(),
+					row[6].isNull() ? "" : row[6].get<std::string>()
 				);
 
 				friends.emplace_back(std::move(relationship));

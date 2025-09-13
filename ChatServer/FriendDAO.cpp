@@ -1,8 +1,8 @@
 ﻿#include "FriendDAO.h"
 #include <iostream>
-#include "Logger.h"
+#include <spdlog/spdlog.h>
 #include "Defer.h"
-
+#include "Logger.h"
 
 bool FriendDAO::Insert(const FriendRelation& relation)
 {
@@ -13,12 +13,14 @@ bool FriendDAO::Insert(const FriendRelation& relation)
 
 	try {
 		LOG_INFO("Inserting relationship: uid_a={}, uid_b={}", relation._a_uid, relation._b_uid);
-		auto result = conn->sql("CALL sp_insert_friend(?, ?, ?, ?, ?, @success)")
+		auto result = conn->sql("CALL sp_insert_friend(?, ?, ?, ?, ?, ?, ?, @success)")
 			.bind(relation._a_uid)
 			.bind(relation._b_uid)
 			.bind(relation._status)
-			.bind(relation._group_a.empty() ? "wodehaoyou" : relation._group_a)
-			.bind(relation._group_b.empty() ? "wodehaoyou" : relation._group_b)
+			.bind(relation._group_a.empty() ? "MyFriends" : relation._group_a)
+			.bind(relation._group_b.empty() ? "MyFriends" : relation._group_b)
+			.bind(relation._remark_a.empty() ? relation._a_uid : relation._remark_a)
+			.bind(relation._remark_b.empty() ? relation._b_uid : relation._remark_b)
 			.execute();
 
 		auto statusResult = conn->sql("SELECT @success").execute();
@@ -48,12 +50,14 @@ bool FriendDAO::Update(const FriendRelation& relation)
 
 	try {
 		LOG_INFO("Updating relationship: uid_a={}, uid_b={}", relation._a_uid, relation._b_uid);
-		auto result = conn->sql("CALL sp_update_friend(?, ?, ?, ?, ?, @success)")
+		auto result = conn->sql("CALL sp_update_friend(?, ?, ?, ?, ?, ?, ?, @success)")
 			.bind(relation._a_uid)
 			.bind(relation._b_uid)
 			.bind(relation._status)
-			.bind(relation._group_a.empty() ? "wodehaoyou" : relation._group_a)
-			.bind(relation._group_b.empty() ? "wodehaoyou" : relation._group_b)
+			.bind(relation._group_a.empty() ? "MyFriends" : relation._group_a)
+			.bind(relation._group_b.empty() ? "MyFriends" : relation._group_b)
+			.bind(relation._remark_a.empty() ? relation._a_uid : relation._remark_a)
+			.bind(relation._remark_b.empty() ? relation._b_uid : relation._remark_b)
 			.execute();
 
 		auto statusResult = conn->sql("SELECT @success").execute();
@@ -93,7 +97,7 @@ bool FriendDAO::DeleteFriendShip(const std::string& a_uid, const std::string& b_
 	};
 
 	try {
-		LOG_INFO("Delete relationship: uid_a={}, uid_b={}",a_uid, b_uid);
+		LOG_INFO("Delete relationship: uid_a={}, uid_b={}", a_uid, b_uid);
 		auto result = conn->sql("CALL sp_delete_friend(?, ?, @success)")
 			.bind(a_uid)
 			.bind(b_uid)
@@ -112,7 +116,7 @@ bool FriendDAO::DeleteFriendShip(const std::string& a_uid, const std::string& b_
 		return success;
 	}
 	catch (const mysqlx::Error& error) {
-		LOG_ERROR("MySQL Error on Delete: {} ( uid_a={}, uid_b={} )",error.what(), a_uid, b_uid);
+		LOG_ERROR("MySQL Error on Delete: {} ( uid_a={}, uid_b={} )", error.what(), a_uid, b_uid);
 		return false;
 	}
 }
@@ -126,7 +130,7 @@ std::vector<std::shared_ptr<FriendRelation>> FriendDAO::GetUserFriends(const std
 	};
 
 	try {
-		LOG_INFO("Finding relationship: uid={}",uid);
+		LOG_INFO("Finding relationship: uid={}", uid);
 		auto result = conn->sql("CALL sp_search_friend(?, @success)")
 			.bind(uid)
 			.execute();
@@ -136,7 +140,7 @@ std::vector<std::shared_ptr<FriendRelation>> FriendDAO::GetUserFriends(const std
 		bool found = statusRow && statusRow[0].get<bool>();
 
 		if (!found) {
-			LOG_WARN("Get User Friends failed: uid={}",uid);
+			LOG_WARN("Get User Friends failed: uid={}", uid);
 		}
 		else {
 			for (auto row : result) {
@@ -145,12 +149,14 @@ std::vector<std::shared_ptr<FriendRelation>> FriendDAO::GetUserFriends(const std
 					row[1].get<std::string>(),
 					row[2].get<int>(),
 					row[3].isNull() ? "" : row[3].get<std::string>(),
-					row[4].isNull() ? "" : row[4].get<std::string>()
+					row[4].isNull() ? "" : row[4].get<std::string>(),
+					row[5].isNull() ? "" : row[5].get<std::string>(),
+					row[6].isNull() ? "" : row[6].get<std::string>()
 				);
 
 				friends.emplace_back(std::move(relationship));
 			}
-			LOG_INFO("Get User Friends success: uid={}, entries={}", uid,friends.size());
+			LOG_INFO("Get User Friends success: uid={}, entries={}", uid, friends.size());
 		}
 	}
 	catch (const mysqlx::Error& error) {
