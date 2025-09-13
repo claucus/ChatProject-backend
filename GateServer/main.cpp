@@ -1,59 +1,12 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include "CServer.h"
 #include "ConfigManager.h"
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/rotating_file_sink.h>
-
-void initServerLogger()
-{
-    try {
-        // ´´½¨¶à¸öÈÕÖ¾½ÓÊÕÆ÷
-        std::vector<spdlog::sink_ptr> sinks;
-
-        // ¿ØÖÆÌ¨Êä³ö
-        auto console_sink = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
-        console_sink->set_level(spdlog::level::debug);
-        sinks.push_back(console_sink);
-
-        // ÎÄ¼şÊä³ö£¨°´´óĞ¡ÂÖ×ª£©
-        auto rotating_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-            "logs/server.log",    // »ù´¡ÎÄ¼şÃû
-            1024 * 1024 * 5,     // 5MB ÎÄ¼ş´óĞ¡
-            3                     // ±£Áô3¸öÀúÊ·ÎÄ¼ş
-        );
-        rotating_sink->set_level(spdlog::level::trace);
-        sinks.push_back(rotating_sink);
-
-        // ´´½¨¸´ºÏlogger
-        auto logger = std::make_shared<spdlog::logger>("server_logger", sinks.begin(), sinks.end());
-
-        // ÉèÖÃÈÕÖ¾¸ñÊ½
-        logger->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [thread %t] %v");
-
-        // ÉèÖÃÈ«¾Ölogger
-        spdlog::set_default_logger(logger);
-
-        // ÉèÖÃÈÕÖ¾¼¶±ğ£¨¿ÉÒÔÍ¨¹ıÅäÖÃÎÄ¼şÅäÖÃ£©
-#ifdef _DEBUG
-        spdlog::set_level(spdlog::level::debug);
-#else
-        spdlog::set_level(spdlog::level::info);
-#endif
-
-        // ´íÎó¼¶±ğÈÕÖ¾Á¢¼´Ë¢ĞÂ
-        spdlog::flush_on(spdlog::level::err);
-
-    }
-    catch (const spdlog::spdlog_ex& ex) {
-        std::cerr << "Server log initialization failed: " << ex.what() << std::endl;
-    }
-}
+#include "Logger.h"
 
 int main()
 {
 	try {
-        initServerLogger();
-
+		Logger::init("logs/server.log", (1 << 23), 5);
 
 		auto& gConfigManager = ConfigManager::GetInstance();
 		unsigned short portNumber = std::stoi(gConfigManager["GateServer"]["port"]);
@@ -70,11 +23,11 @@ int main()
 		);
 
 		std::make_shared<CServer>(ioc, portNumber)->Start();
-        spdlog::info("io_context is running on the port: {}", portNumber);
+		LOG_INFO("io_context is running on the port: {}", portNumber);
 		ioc.run();
 	}
 	catch (const std::exception& e) {
-		std::cerr << "Exception: " << e.what() << std::endl;
+		LOG_ERROR("Exception: {}", e.what());
 		return EXIT_FAILURE;
 	}
 }

@@ -133,6 +133,7 @@
     <ClInclude Include="FriendDAO.h" />
     <ClInclude Include="HttpConnection.h" />
     <ClInclude Include="IOContextPool.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="LogicSystem.h" />
     <ClInclude Include="message.grpc.pb.h" />
     <ClInclude Include="message.pb.h" />

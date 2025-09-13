@@ -2,7 +2,7 @@
 #include <iostream>
 #include <spdlog/spdlog.h>
 #include "Defer.h"
-
+#include "Logger.h"
 
 bool FriendDAO::Insert(const FriendRelation& relation)
 {
@@ -12,7 +12,7 @@ bool FriendDAO::Insert(const FriendRelation& relation)
 	};
 
 	try {
-		spdlog::info("[FriendDAO] Inserting relationship: uid_a={}, uid_b={}", relation._a_uid, relation._b_uid);
+		LOG_INFO("Inserting relationship: uid_a={}, uid_b={}", relation._a_uid, relation._b_uid);
 		auto result = conn->sql("CALL sp_insert_friend(?, ?, ?, ?, ?, @success)")
 			.bind(relation._a_uid)
 			.bind(relation._b_uid)
@@ -26,15 +26,15 @@ bool FriendDAO::Insert(const FriendRelation& relation)
 		bool success = row[0].get<bool>();
 
 		if (success) {
-			spdlog::info("[FriendDAO] Insert relationship success: uid_a={}, uid_b={}", relation._a_uid, relation._b_uid);
+			LOG_INFO("Insert relationship success: uid_a={}, uid_b={}", relation._a_uid, relation._b_uid);
 		}
 		else {
-			spdlog::warn("[FriendDAO] Insert relationship failed: uid_a={}, uid_b={}", relation._a_uid, relation._b_uid);
+			LOG_WARN("Insert relationship failed: uid_a={}, uid_b={}", relation._a_uid, relation._b_uid);
 		}
 		return success;
 	}
 	catch (const mysqlx::Error& error) {
-		spdlog::error("[FriendDAO] MySQL Error on insert: {} (uid_a={}, uid_b={})", error.what(), relation._a_uid, relation._b_uid);
+		LOG_ERROR("MySQL Error on insert: {} (uid_a={}, uid_b={})", error.what(), relation._a_uid, relation._b_uid);
 		return false;
 	}
 }
@@ -47,7 +47,7 @@ bool FriendDAO::Update(const FriendRelation& relation)
 	};
 
 	try {
-		spdlog::info("[FriendDAO] Updating relationship: uid_a={}, uid_b={}", relation._a_uid, relation._b_uid);
+		LOG_INFO("Updating relationship: uid_a={}, uid_b={}", relation._a_uid, relation._b_uid);
 		auto result = conn->sql("CALL sp_update_friend(?, ?, ?, ?, ?, @success)")
 			.bind(relation._a_uid)
 			.bind(relation._b_uid)
@@ -61,16 +61,16 @@ bool FriendDAO::Update(const FriendRelation& relation)
 		bool success = row[0].get<bool>();
 
 		if (success) {
-			spdlog::info("[FriendDAO] Update relationship success: uid_a={}, uid_b={}", relation._a_uid, relation._b_uid);
+			LOG_INFO("Update relationship success: uid_a={}, uid_b={}", relation._a_uid, relation._b_uid);
 		}
 		else {
-			spdlog::warn("[FriendDAO] Update relationship failed: uid_a={}, uid_b={}", relation._a_uid, relation._b_uid);
+			LOG_WARN("Update relationship failed: uid_a={}, uid_b={}", relation._a_uid, relation._b_uid);
 		}
 		return success;
 
 	}
 	catch (const mysqlx::Error& error) {
-		spdlog::error("[FriendDAO] MySQL Error on update: {} (uid_a={}, uid_b={})", error.what(), relation._a_uid, relation._b_uid);
+		LOG_ERROR("MySQL Error on update: {} (uid_a={}, uid_b={})", error.what(), relation._a_uid, relation._b_uid);
 		return false;
 	}
 }
@@ -93,7 +93,7 @@ bool FriendDAO::DeleteFriendShip(const std::string& a_uid, const std::string& b_
 	};
 
 	try {
-		spdlog::info("[FriendDAO] Delete relationship: uid_a={}, uid_b={}",a_uid, b_uid);
+		LOG_INFO("Delete relationship: uid_a={}, uid_b={}", a_uid, b_uid);
 		auto result = conn->sql("CALL sp_delete_friend(?, ?, @success)")
 			.bind(a_uid)
 			.bind(b_uid)
@@ -104,15 +104,15 @@ bool FriendDAO::DeleteFriendShip(const std::string& a_uid, const std::string& b_
 		bool success = row && row[0].get<bool>();
 
 		if (success) {
-			spdlog::info("[FriendDAO] Delete relationship success: uid_a={}, uid_b={}", a_uid, b_uid);
+			LOG_INFO("Delete relationship success: uid_a={}, uid_b={}", a_uid, b_uid);
 		}
 		else {
-			spdlog::warn("[FriendDAO] Delete relationship failed: uid_a={}, uid_b={}", a_uid, b_uid);
+			LOG_WARN("Delete relationship failed: uid_a={}, uid_b={}", a_uid, b_uid);
 		}
 		return success;
 	}
 	catch (const mysqlx::Error& error) {
-		spdlog::error("[FriendDAO] MySQL Error on Delete: {} ( uid_a={}, uid_b={} )",error.what(), a_uid, b_uid);
+		LOG_ERROR("MySQL Error on Delete: {} ( uid_a={}, uid_b={} )", error.what(), a_uid, b_uid);
 		return false;
 	}
 }
@@ -126,7 +126,7 @@ std::vector<std::shared_ptr<FriendRelation>> FriendDAO::GetUserFriends(const std
 	};
 
 	try {
-		spdlog::info("[FriendDAO] Finding relationship: uid={}",uid);
+		LOG_INFO("Finding relationship: uid={}", uid);
 		auto result = conn->sql("CALL sp_search_friend(?, @success)")
 			.bind(uid)
 			.execute();
@@ -136,7 +136,7 @@ std::vector<std::shared_ptr<FriendRelation>> FriendDAO::GetUserFriends(const std
 		bool found = statusRow && statusRow[0].get<bool>();
 
 		if (!found) {
-			spdlog::warn("[FriendDAO] Get User Friends failed: uid={}",uid);
+			LOG_WARN("Get User Friends failed: uid={}", uid);
 		}
 		else {
 			for (auto row : result) {
@@ -150,11 +150,11 @@ std::vector<std::shared_ptr<FriendRelation>> FriendDAO::GetUserFriends(const std
 
 				friends.emplace_back(std::move(relationship));
 			}
-			spdlog::info("[FriendDAO] Get User Friends success: uid={}, entries={}", uid,friends.size());
+			LOG_INFO("Get User Friends success: uid={}, entries={}", uid, friends.size());
 		}
 	}
 	catch (const mysqlx::Error& error) {
-		spdlog::error("[FriendDAO] MySQL Error on Delete: {} ( uid={} )", error.what(), uid);
+		LOG_ERROR("MySQL Error on Delete: {} ( uid={} )", error.what(), uid);
 	}
 	return friends;
 }
@@ -169,7 +169,7 @@ std::vector<std::shared_ptr<SearchInfo>> FriendDAO::Search(const std::string& ui
 	};
 
 	try {
-		spdlog::info("[FriendDAO] Finding User by Fuzzy Search: uid={}, pattern={}", uid, pattern);
+		LOG_INFO("Finding User by Fuzzy Search: uid={}, pattern={}", uid, pattern);
 		auto result = conn->sql("CALL sp_fuzzy_search_uid_email(?,?,@success)")
 			.bind(uid)
 			.bind(pattern)
@@ -180,7 +180,7 @@ std::vector<std::shared_ptr<SearchInfo>> FriendDAO::Search(const std::string& ui
 		bool found = statusRow && statusRow[0].get<bool>();
 
 		if (!found) {
-			spdlog::warn("[FriendDAO] Fuzzy Search failed: uid={}, pattern={}", uid, pattern);
+			LOG_WARN("Fuzzy Search failed: uid={}, pattern={}", uid, pattern);
 		}
 		else {
 			for (auto row : result) {
@@ -193,11 +193,11 @@ std::vector<std::shared_ptr<SearchInfo>> FriendDAO::Search(const std::string& ui
 
 				results.emplace_back(std::move(user));
 			}
-			spdlog::info("[FriendDAO] Fuzzy Search success: uid={}, pattern={}, entries={}", uid, pattern, results.size());
+			LOG_INFO("Fuzzy Search success: uid={}, pattern={}, entries={}", uid, pattern, results.size());
 		}
 	}
 	catch (const mysqlx::Error& error) {
-		spdlog::error("[FriendDAO] MySQL Error on Fuzzy Search: {} (uid={}, pattern={})", error.what(), uid, pattern);
+		LOG_ERROR("MySQL Error on Fuzzy Search: {} (uid={}, pattern={})", error.what(), uid, pattern);
 	}
 	return results;
 }
