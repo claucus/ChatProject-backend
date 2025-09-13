@@ -4,24 +4,24 @@
 #include "RedisConPool.h"
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/random_generator.hpp>
-#include <spdlog/spdlog.h>
+#include "Logger.h"
 
 std::string generateToken() {
     boost::uuids::uuid uid = boost::uuids::random_generator()();
     auto token = boost::uuids::to_string(uid);
-    spdlog::debug("[StatusServer] Generated new token: {}", token);
+    LOG_DEBUG("Generated new token: {}", token);
     return token;
 }
 
 StatusServerImpl::StatusServerImpl()
 {
-    spdlog::info("[StatusServer] Initializing Status Server");
+    LOG_INFO("Initializing Status Server");
     auto& cfg = ConfigManager::GetInstance();
 
     try {
         auto serverList = cfg["ServerList"]["ServerName"];
         
-        spdlog::info("[StatusServer] ServerList Load Successful");
+        LOG_INFO("ServerList Load Successful");
 
         std::vector<std::string> servers;
 
@@ -30,7 +30,7 @@ StatusServerImpl::StatusServerImpl()
 
         while (std::getline(ss, server, ',')) {
             servers.emplace_back(server);
-			spdlog::debug("[StatusServer] Found server: {}", server);
+			LOG_DEBUG("Found server: {}", server);
         }
 
         size_t cnt = 0;
@@ -45,14 +45,13 @@ StatusServerImpl::StatusServerImpl()
             server.name = cfg[serverName]["name"];
             _servers[server.name] = server;
             
-            spdlog::info("[StatusServer] Registered Chat Server {} - Name: {}, Host: {}:{}",
-                ++cnt, server.name, server.host, server.port);
+            LOG_INFO("Registered Chat Server {} - Name: {}, Host: {}:{}", ++cnt, server.name, server.host, server.port);
         }
 
-        spdlog::info("[StatusServer] Initialization completed. Total servers: {}", _servers.size());
+        LOG_INFO("Initialization completed. Total servers: {}", _servers.size());
     }
     catch (const std::exception& e) {
-        spdlog::critical("[StatusServer] Initialization failed: {}", e.what());
+        LOG_CRITICAL("Initialization failed: {}", e.what());
         throw;
     }
 }
@@ -61,13 +60,13 @@ void StatusServerImpl::insertToken(std::string uid, std::string token)
 {
     std::lock_guard <std::mutex> lock(_tokenMutex);
     RedisConPool::GetInstance().set(ChatServiceConstant::USER_TOKEN_PREFIX + uid, token);
-    spdlog::debug("[StatusServer] Token inserted for UID: {}", uid);
+    LOG_DEBUG("Token inserted for UID: {}", uid);
 }
 
 grpc::Status StatusServerImpl::GetChatServer(grpc::ServerContext* context, 
     const message::GetChatServerRequest* request, message::GetChatServerResponse* response)
 {
-    spdlog::info("[StatusServer] Received GetChatServer request from UID: {}", request->uid());
+    LOG_INFO("Received GetChatServer request from UID: {}", request->uid());
     
     const auto& server = GetChatServer();
     
@@ -78,9 +77,8 @@ grpc::Status StatusServerImpl::GetChatServer(grpc::ServerContext* context,
     response->set_token(generateToken());
     insertToken(request->uid(), response->token());
 
-    spdlog::info("[StatusServer] Assigned server to client - Server: {}, Host: {}:{}, Connections: {}", 
-                 server.name, server.host, server.port, server.con_count);
-    spdlog::debug("[StatusServer] Generated token for UID {}: {}", request->uid(), response->token());
+    LOG_INFO("Assigned server to client - Server: {}, Host: {}:{}, Connections: {}", server.name, server.host, server.port, server.con_count);
+    LOG_DEBUG("Generated token for UID {}: {}", request->uid(), response->token());
 
     return grpc::Status::OK;
 }
@@ -118,16 +116,15 @@ ChatServer StatusServerImpl::GetChatServer()
         }
     }
 
-    spdlog::debug("[StatusServer] Selected chat server {} with {} connections", 
-                  minServer.name, minServer.con_count);
+    LOG_DEBUG("Selected chat server {} with {} connections", minServer.name, minServer.con_count);
     return minServer;
 }
 
 grpc::Status StatusServerImpl::Login(grpc::ServerContext* context, 
     const message::LoginRequest* request, message::LoginResponse* response)
 {
-    spdlog::info("[StatusServer] Received login request - UID: {}", request->uid());
-    spdlog::debug("[StatusServer] Login attempt with token: {}", request->token());
+    LOG_INFO("Received login request - UID: {}", request->uid());
+    LOG_DEBUG("Login attempt with token: {}", request->token());
 
     auto uid = request->uid();
     auto token = request->token();
@@ -138,17 +135,17 @@ grpc::Status StatusServerImpl::Login(grpc::ServerContext* context,
 
     if (token_value.empty()) {
         response->set_error(static_cast<int>(ErrorCodes::UID_INVALID));
-        spdlog::warn("[StatusServer] Login failed - Invalid UID: {}", uid);
+        LOG_WARN("Login failed - Invalid UID: {}", uid);
         return grpc::Status::OK;
     }
 
     if (token_value != token) {
         response->set_error(static_cast<int>(ErrorCodes::TOKEN_INVALID));
-		spdlog::warn("[StatusServer] Login failed - Invalid token for UID: {}", uid);
+		LOG_WARN("Login failed - Invalid token for UID: {}", uid);
         return grpc::Status::OK;
     }
 
-    spdlog::info("[StatusServer] Login successful for UID: {}", uid);
+    LOG_INFO("Login successful for UID: {}", uid);
 
     response->set_error(static_cast<int>(ErrorCodes::SUCCESS));
     response->set_uid(uid);

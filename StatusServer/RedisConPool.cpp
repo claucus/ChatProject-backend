@@ -1,6 +1,6 @@
-#include "RedisConPool.h"
+ï»¿#include "RedisConPool.h"
 #include "ConfigManager.h"
-#include <spdlog/spdlog.h>
+#include "Logger.h"
 
 sw::redis::Redis& RedisConPool::GetInstance()
 {
@@ -10,12 +10,12 @@ sw::redis::Redis& RedisConPool::GetInstance()
 
 RedisConPool::~RedisConPool()
 {
-    spdlog::info("[RedisPool] Destroying Redis connection pool");
+    LOG_INFO("Destroying Redis connection pool");
 }
 
 RedisConPool::RedisConPool()
 {
-    spdlog::info("[RedisPool] Initializing Redis connection pool");
+    LOG_INFO("Initializing Redis connection pool");
     
     try {
         sw::redis::ConnectionOptions _options;
@@ -25,24 +25,24 @@ RedisConPool::RedisConPool()
         _options.port = std::stoi(configManager["Redis"]["port"]);
         _options.socket_timeout = std::chrono::milliseconds(200);
         
-        spdlog::debug("[RedisPool] Configuring connection - Host: {}, Port: {}, Timeout: {}ms", 
+        LOG_DEBUG("Configuring connection - Host: {}, Port: {}, Timeout: {}ms", 
                       _options.host, _options.port, 200);
 
         _redis = std::make_unique<sw::redis::Redis>(_options);
         
-        // ÑéÖ¤Á¬½ÓÊÇ·ñ³É¹¦
+        // éªŒè¯è¿žæŽ¥æ˜¯å¦æˆåŠŸ
         try {
             _redis->ping();
-            spdlog::info("[RedisPool] Successfully connected to Redis server");
+            LOG_INFO("Successfully connected to Redis server");
         }
         catch (const sw::redis::Error& e) {
-            spdlog::critical("[RedisPool] Failed to connect to Redis server: {}", e.what());
-            throw; // ÖØÐÂÅ×³öÒì³££¬ÒòÎªÕâÊÇÖÂÃü´íÎó
+            LOG_CRITICAL("Failed to connect to Redis server: {}", e.what());
+            throw; // é‡æ–°æŠ›å‡ºå¼‚å¸¸ï¼Œå› ä¸ºè¿™æ˜¯è‡´å‘½é”™è¯¯
         }
     }
     catch (const std::exception& e) {
-        spdlog::critical("[RedisPool] Redis pool initialization failed: {}", e.what());
-        throw; // ÖØÐÂÅ×³öÒì³££¬±íÊ¾³õÊ¼»¯Ê§°Ü
+        LOG_CRITICAL("Redis pool initialization failed: {}", e.what());
+        throw; // é‡æ–°æŠ›å‡ºå¼‚å¸¸ï¼Œè¡¨ç¤ºåˆå§‹åŒ–å¤±è´¥
     }
 }
 
@@ -51,13 +51,13 @@ void RedisConPool::HealthCheck()
     try {
         if (_redis) {
             _redis->ping();
-            spdlog::debug("[RedisPool] Health check successful");
+            LOG_DEBUG("Health check successful");
         }
         else {
-            spdlog::error("[RedisPool] Redis connection is null");
+            LOG_ERROR("Redis connection is null");
         }
     }
     catch (const sw::redis::Error& e) {
-        spdlog::error("[RedisPool] Health check failed: {}", e.what());
+        LOG_ERROR("Health check failed: {}", e.what());
     }
 }

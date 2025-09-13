@@ -56,6 +56,9 @@
     <ClInclude Include="RedisConPool.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="config.ini" />

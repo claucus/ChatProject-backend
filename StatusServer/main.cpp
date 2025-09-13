@@ -1,60 +1,13 @@
-#include <iostream>
+ï»¿#include <iostream>
+#include <boost/asio.hpp>
 #include "StatusServerImpl.h"
 #include "ConfigManager.h"
-#include <boost/asio.hpp>
-#include <memory>
-#include <thread>
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/rotating_file_sink.h>
+#include "Logger.h"
 
-void initServerLogger()
-{
-	try {
-		// ´´½¨¶à¸öÈÕÖ¾½ÓÊÕÆ÷
-		std::vector<spdlog::sink_ptr> sinks;
-
-		// ¿ØÖÆÌ¨Êä³ö
-		auto console_sink = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
-		console_sink->set_level(spdlog::level::debug);
-		sinks.push_back(console_sink);
-
-		// ÎÄ¼şÊä³ö£¨°´´óĞ¡ÂÖ×ª£©
-		auto rotating_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-			"logs/server.log",    // »ù´¡ÎÄ¼şÃû
-			1024 * 1024 * 5,     // 5MB ÎÄ¼ş´óĞ¡
-			3                     // ±£Áô3¸öÀúÊ·ÎÄ¼ş
-		);
-		rotating_sink->set_level(spdlog::level::trace);
-		sinks.push_back(rotating_sink);
-
-		// ´´½¨¸´ºÏlogger
-		auto logger = std::make_shared<spdlog::logger>("server_logger", sinks.begin(), sinks.end());
-
-		// ÉèÖÃÈÕÖ¾¸ñÊ½
-		logger->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [thread %t] %v");
-
-		// ÉèÖÃÈ«¾Ölogger
-		spdlog::set_default_logger(logger);
-
-		// ÉèÖÃÈÕÖ¾¼¶±ğ£¨¿ÉÒÔÍ¨¹ıÅäÖÃÎÄ¼şÅäÖÃ£©
-#ifdef _DEBUG
-		spdlog::set_level(spdlog::level::debug);
-#else
-		spdlog::set_level(spdlog::level::info);
-#endif
-
-		// ´íÎó¼¶±ğÈÕÖ¾Á¢¼´Ë¢ĞÂ
-		spdlog::flush_on(spdlog::level::err);
-
-	}
-	catch (const spdlog::spdlog_ex& ex) {
-		std::cerr << "Server log initialization failed: " << ex.what() << std::endl;
-	}
-}
 
 int main() {
 	try {
-		initServerLogger();
+		Logger::init("logs/server.log", (1 << 23), 5);
 
 		auto& configManager = ConfigManager::GetInstance();
 
@@ -66,7 +19,7 @@ int main() {
 		builder.RegisterService(&service);
 
 		std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-		spdlog::info("Status Server listening on {}", addr);
+		LOG_INFO("Status Server listening on {}", addr);
 
 		boost::asio::io_context ioc;
 		boost::asio::signal_set signals(ioc, SIGINT, SIGTERM);
@@ -74,7 +27,7 @@ int main() {
 		signals.async_wait(
 			[&server,&ioc](const boost::system::error_code& error, int signal) {
 				if (!error) {
-					spdlog::info("Shutting Down Server...");
+					LOG_INFO("Shutting Down Server...");
 					server->Shutdown();
 					ioc.stop();
 				}
@@ -90,7 +43,7 @@ int main() {
 		server->Wait();
 	}
 	catch (const std::exception& e) {
-		std::cerr << "Exception: " << e.what() << std::endl;
+		LOG_ERROR("Exception: {}", e.what());
 		return EXIT_FAILURE;
 	}
 	return 0;

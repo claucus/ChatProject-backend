@@ -1,8 +1,8 @@
-#include "ConfigManager.h"
+﻿#include "ConfigManager.h"
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
-#include <spdlog/spdlog.h>
+#include "Logger.h"
 
 SectionInfo::SectionInfo(const SectionInfo& src)
 {
@@ -65,7 +65,7 @@ ConfigManager::ConfigManager()
 		sectionInfo._section = sectionConfig;
 		_configMap[sectionName] = sectionInfo;
 	}
-    spdlog::info("[ConfigManager] Loading config.ini Success");
+    LOG_INFO("Loading config.ini Success");
 }
 
 SectionInfo ConfigManager::operator[](const std::string& section)
