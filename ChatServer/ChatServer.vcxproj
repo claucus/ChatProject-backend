@@ -137,6 +137,7 @@
     <ClInclude Include="FriendServerImpl.h" />
     <ClInclude Include="GrpcPool.h" />
     <ClInclude Include="IOContextPool.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="LogicNode.h" />
     <ClInclude Include="LogicSystem.h" />
     <ClInclude Include="message.grpc.pb.h" />

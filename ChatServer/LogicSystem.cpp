@@ -5,19 +5,19 @@
 #include "ConfigManager.h"
 #include "UserManager.h"
 #include "Defer.h"
+#include "Logger.h"
 
-#include <spdlog/spdlog.h>
 #include <chrono>
 #include "FriendGrpcClient.h"
 
 LogicSystem::~LogicSystem()
 {
-    spdlog::info("[LogicSystem] Destructor called, stopping message processing...");
+    LOG_INFO("[LogicSystem] Destructor called, stopping message processing...");
     _b_stop = true;
     _consume.notify_one();
     if (_thread.joinable()) {
         _thread.join();
-        spdlog::info("[LogicSystem] Worker thread joined successfully");
+        LOG_INFO("[LogicSystem] Worker thread joined successfully");
     }
 }
 
@@ -25,27 +25,27 @@ void LogicSystem::PostMessageToQueue(std::shared_ptr<LogicNode> message)
 {
     std::unique_lock<std::mutex> lock(_mutex);
     _messageQueue.push(message);
-    spdlog::debug("[LogicSystem] Message queued, queue size: {}", _messageQueue.size());
+    LOG_DEBUG("[LogicSystem] Message queued, queue size: {}", _messageQueue.size());
 
     if (_messageQueue.size() == 1) {
         lock.unlock();
         _consume.notify_one();
-        spdlog::debug("[LogicSystem] Consumer thread notified");
+        LOG_DEBUG("[LogicSystem] Consumer thread notified");
     }
 }
 
 LogicSystem::LogicSystem():
     _b_stop(false)
 {
-    spdlog::info("[LogicSystem] Initializing...");
+    LOG_INFO("[LogicSystem] Initializing...");
     RegisterCallBack();
     _thread = std::thread(&LogicSystem::DealMessage, this);
-    spdlog::info("[LogicSystem] Worker thread started");
+    LOG_INFO("[LogicSystem] Worker thread started");
 }
 
 void LogicSystem::DealMessage()
 {
-    spdlog::info("[LogicSystem] Message processing thread started");
+    LOG_INFO("[LogicSystem] Message processing thread started");
     while (true) {
         std::unique_lock<std::mutex> lock(_mutex);
         while (_messageQueue.empty() && !_b_stop) {
@@ -53,13 +53,13 @@ void LogicSystem::DealMessage()
         }
 
         if (_b_stop) {
-            spdlog::info("[LogicSystem] Stopping message processing, remaining messages: {}", _messageQueue.size());
+            LOG_INFO("[LogicSystem] Stopping message processing, remaining messages: {}", _messageQueue.size());
             while (!_messageQueue.empty()) {
                 auto messageNode = _messageQueue.front();
 
                 auto callBackIter = _funcCallBack.find(messageNode->_receiveNode->GetId());
                 if (callBackIter == _funcCallBack.end()) {
-                    spdlog::warn("[LogicSystem] No callback found for message ID: {}", messageNode->_receiveNode->GetId());
+                    LOG_WARN("[LogicSystem] No callback found for message ID: {}", messageNode->_receiveNode->GetId());
                     _messageQueue.pop();
                     continue;
                 }
@@ -75,11 +75,11 @@ void LogicSystem::DealMessage()
         }
 
         auto messageNode = _messageQueue.front();
-        spdlog::debug("[LogicSystem] Processing message ID: {}", messageNode->_receiveNode->GetId());
+        LOG_DEBUG("[LogicSystem] Processing message ID: {}", messageNode->_receiveNode->GetId());
 
         auto callBackIter = _funcCallBack.find(messageNode->_receiveNode->GetId());
         if (callBackIter == _funcCallBack.end()) {
-            spdlog::warn("[LogicSystem] No handler registered for message ID: {}", messageNode->_receiveNode->GetId());
+            LOG_WARN("[LogicSystem] No handler registered for message ID: {}", messageNode->_receiveNode->GetId());
             _messageQueue.pop();
             continue;
         }
@@ -89,19 +89,19 @@ void LogicSystem::DealMessage()
             std::string(messageNode->_receiveNode->_data, messageNode->_receiveNode->_currentLength)
         );
         _messageQueue.pop();
-        spdlog::debug("[LogicSystem] Message processed, remaining queue size: {}", _messageQueue.size());
+        LOG_DEBUG("[LogicSystem] Message processed, remaining queue size: {}", _messageQueue.size());
     }
 }
 
 void LogicSystem::RegisterCallBack()
 {
-    spdlog::info("[LogicSystem] Registering message callbacks...");
+    LOG_INFO("[LogicSystem] Registering message callbacks...");
     auto id = static_cast<size_t>(MessageID::MESSAGE_CHAT_LOGIN);
     _funcCallBack[id] = std::bind(&LogicSystem::LoginHandler,this,
             std::placeholders::_1,
             std::placeholders::_2,
             std::placeholders::_3);
-    spdlog::info("[LogicSystem] Registered login handler for message ID: {}", id);
+    LOG_INFO("[LogicSystem] Registered login handler for message ID: {}", id);
 
 
     id = static_cast<size_t>(MessageID::MESSAGE_GET_SEARCH_USER);
@@ -109,7 +109,7 @@ void LogicSystem::RegisterCallBack()
             std::placeholders::_1,
             std::placeholders::_2,
             std::placeholders::_3);
-    spdlog::info("[LogicSystem] Registered search handler for message ID: {}", id);
+    LOG_INFO("[LogicSystem] Registered search handler for message ID: {}", id);
 
 
     id = static_cast<size_t>(MessageID::MESSAGE_APPLY_FRIEND);
@@ -117,12 +117,12 @@ void LogicSystem::RegisterCallBack()
         std::placeholders::_1,
         std::placeholders::_2,
         std::placeholders::_3);
-    spdlog::info("[LogicSystem] Registered apply friend handler for message ID: {}", id);
+    LOG_INFO("[LogicSystem] Registered apply friend handler for message ID: {}", id);
 }
 
 void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData)
 {
-    spdlog::info("[LogicSystem] Processing login request...");
+    LOG_INFO("[LogicSystem] Processing login request...");
 
     json root;
     defer{
@@ -135,20 +135,20 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
 
         std::string uid = src["uid"].get<std::string>();
         std::string token = src["token"].get<std::string>();
-        spdlog::info("[LogicSystem] Login attempt - UID: {}, Token length: {}", uid, token.length());
+        LOG_INFO("[LogicSystem] Login attempt - UID: {}, Token length: {}", uid, token.length());
 
 
         std::string tokenKey = ChatServiceConstant::USER_TOKEN_PREFIX + uid;
         auto tokenValue = RedisConPool::GetInstance().get(tokenKey).value();
 
 		if (tokenValue.empty()) {
-			spdlog::error("[LogicSystem] Token not found in Redis for UID: {}", uid);
+			LOG_ERROR("[LogicSystem] Token not found in Redis for UID: {}", uid);
 			root["error"] = static_cast<size_t>(ErrorCodes::UID_INVALID);
 			return;
 		}
 
 		if (tokenValue != token) {
-			spdlog::error("[LogicSystem] Token mismatch for UID: {}", uid);
+			LOG_ERROR("[LogicSystem] Token mismatch for UID: {}", uid);
 			root["error"] = static_cast<size_t>(ErrorCodes::TOKEN_INVALID);
 			return;
 		}
@@ -161,7 +161,7 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
         auto baseInfoExists = GetUserInfo(baseKey, uid, userInfo);
 
 		if (!baseInfoExists) {
-			spdlog::error("[LogicSystem] User info not found for UID: {}", uid);
+			LOG_ERROR("[LogicSystem] User info not found for UID: {}", uid);
 			root["error"] = static_cast<size_t>(ErrorCodes::UID_INVALID);
 			return;
 		}
@@ -196,19 +196,19 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
 
 		UserManager::GetInstance()->setUserSession(uid, session);
 
-		spdlog::info("[LogicSystem] Login successful for UID: {}", uid);
+		LOG_INFO("[LogicSystem] Login successful for UID: {}", uid);
 
 		return;
     }
     catch (const json::parse_error& e) {
-        spdlog::warn("[LogicSystem] Failed to parse JSON in LoginHandler: {}", e.what());
+        LOG_WARN("[LogicSystem] Failed to parse JSON in LoginHandler: {}", e.what());
         root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
     }
 }
 
 void LogicSystem::SearchHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData)
 {
-    spdlog::info("[LogicSystem] Processing search request...");
+    LOG_INFO("[LogicSystem] Processing search request...");
 
     json root;
     defer{
@@ -222,7 +222,7 @@ void LogicSystem::SearchHandler(std::shared_ptr<CSession> session, const size_t&
         std::string uid = src["uid"].get<std::string>();
         std::string selfUid = src["self"].get<std::string>();
 
-        spdlog::info("[LogicSystem] Search attempt - UID: {}", uid);
+        LOG_INFO("[LogicSystem] Search attempt - UID: {}", uid);
 
         root["error"] = static_cast<int>(ErrorCodes::SUCCESS);
         root["users"] = json::array();
@@ -248,14 +248,14 @@ void LogicSystem::SearchHandler(std::shared_ptr<CSession> session, const size_t&
        
     }
     catch (const json::parse_error& e) {
-        spdlog::warn("[LogicSystem] Failed to parse JSON in SearchHandler: {}", e.what());
+        LOG_WARN("[LogicSystem] Failed to parse JSON in SearchHandler: {}", e.what());
         root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
     }
 }
 
 void LogicSystem::ApplyFriendHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData)
 {
-	spdlog::info("[LogicSystem] Processing Apply Friend request...");
+	LOG_INFO("[LogicSystem] Processing Apply Friend request...");
 
 	json root;
 	defer{
@@ -273,7 +273,7 @@ void LogicSystem::ApplyFriendHandler(std::shared_ptr<CSession> session, const si
         auto now_time = std::chrono::system_clock::now().time_since_epoch();
 
 
-        spdlog::info("[LogicSystem] Friend attempt - UID: {}", from_uid);
+        LOG_INFO("[LogicSystem] Friend attempt - UID: {}", from_uid);
 
         root["error"] = static_cast<int>(ErrorCodes::SUCCESS);
 
@@ -330,7 +330,7 @@ void LogicSystem::ApplyFriendHandler(std::shared_ptr<CSession> session, const si
         FriendGrpcClient::GetInstance()->SendFriend(to_ip_value,request);
 	}
 	catch (const json::parse_error& e) {
-		spdlog::warn("[LogicSystem] Failed to parse JSON in ApplyFriendHandler: {}", e.what());
+		LOG_WARN("[LogicSystem] Failed to parse JSON in ApplyFriendHandler: {}", e.what());
         root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
 	}
 }
@@ -345,21 +345,21 @@ bool LogicSystem::GetUserInfo(std::string baseKey, std::string uid, std::shared_
             userInfo->_uid = src["uid"].get<std::string>();
             userInfo->_username = src["username"].get<std::string>();
             userInfo->_password = src["password"].get<std::string>();
-			spdlog::info("[LogicSystem] Retrieved user info for uid: {}", uid);
+			LOG_INFO("[LogicSystem] Retrieved user info for uid: {}", uid);
         }
         catch(const json::parse_error& e){
-			spdlog::warn("[LogicSystem] Failed to parse JSON in GetUserInfo: {}", e.what());
+			LOG_WARN("[LogicSystem] Failed to parse JSON in GetUserInfo: {}", e.what());
         }
         return true;
 	}
 	else {
-		spdlog::error("[LogicSystem] No user info found for uid: {}", uid);
+		LOG_ERROR("[LogicSystem] No user info found for uid: {}", uid);
 
 		std::shared_ptr<UserInfo> tmp_userInfo = nullptr;
 		tmp_userInfo = MySQLManager::GetInstance()->GetUser(uid);
 
 		if (tmp_userInfo == nullptr) {
-			spdlog::error("[LogicSystem] No user found in MySQL for uid: {}", uid);
+			LOG_ERROR("[LogicSystem] No user found in MySQL for uid: {}", uid);
 			return false;
 		}
 
@@ -376,7 +376,7 @@ bool LogicSystem::GetUserInfo(std::string baseKey, std::string uid, std::shared_
 
         std::string redisString = root.dump(4);
 		RedisConPool::GetInstance().set(baseKey, redisString);
-		spdlog::info("[LogicSystem] Cached user info for uid: {}", uid);
+		LOG_INFO("[LogicSystem] Cached user info for uid: {}", uid);
 	}
 
 	return true;

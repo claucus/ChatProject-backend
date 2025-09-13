@@ -1,19 +1,19 @@
-#include "CServer.h"
+﻿#include "CServer.h"
 #include "UserManager.h"
-#include <spdlog/spdlog.h>
+#include "Logger.h"
 
 CServer::CServer(boost::asio::io_context& ioc, short port):
 	_ioc(ioc),
 	_port(port),
 	_acceptor(ioc,boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(),port))
 {
-	spdlog::info("[Server] Starting server on port {}", port);
+	LOG_INFO("Starting server on port {}", port);
 	Start();
 }
 
 CServer::~CServer()
 {
-	spdlog::info("[Server] Shutting down server");
+	LOG_INFO("Shutting down server");
 }
 
 void CServer::clearSession(std::string session)
@@ -26,10 +26,10 @@ void CServer::clearSession(std::string session)
 			_sessions.erase(session);
 		}
 
-		spdlog::debug("[Server] Session {} removed, remaining sessions: {}", session, _sessions.size());
+		LOG_DEBUG("Session {} removed, remaining sessions: {}", session, _sessions.size());
 	}
 	else {
-		spdlog::warn("[Server] Attempted to remove non-existent session: {}", session);
+		LOG_WARN("Attempted to remove non-existent session: {}", session);
 	}
 }
 
@@ -40,12 +40,12 @@ void CServer::handlerAccept(std::shared_ptr<CSession> newSession, const boost::s
 		{
 			std::lock_guard<std::mutex> lock(_mutex);
 			_sessions.insert(std::make_pair(newSession->GetUid(), newSession));
-			spdlog::info("[Server] New session accepted - UUID: {}, Total sessions: {}", 
+			LOG_INFO("New session accepted - UUID: {}, Total sessions: {}", 
 						newSession->GetUid(), _sessions.size());
 		}
 	}
 	else {
-		spdlog::error("[Server] Session accept error: {}", error.what());
+		LOG_ERROR("Session accept error: {}", error.what());
 	}
 
 	Start();
@@ -56,7 +56,7 @@ void CServer::Start()
 	auto& ioc = IOContextPool::GetInstance()->getIOContext();
 	std::shared_ptr<CSession> new_session = std::make_shared<CSession>(ioc, this);
 	
-	spdlog::debug("[Server] Setting up new session acceptance on port {}", _port);
+	LOG_DEBUG("Setting up new session acceptance on port {}", _port);
 	
 	_acceptor.async_accept(
 		new_session->GetSocket(),

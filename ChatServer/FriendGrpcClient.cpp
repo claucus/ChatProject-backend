@@ -1,7 +1,7 @@
 ﻿#include "FriendGrpcClient.h"
 #include "ConfigManager.h"
 #include "Defer.h"
-#include <spdlog/spdlog.h>
+#include "Logger.h"
 #include "const.h"
 
 message::FriendResponse FriendGrpcClient::SendFriend(const std::string server_ip, const message::FriendRequest& request)
@@ -23,15 +23,15 @@ message::FriendResponse FriendGrpcClient::SendFriend(const std::string server_ip
 
 	auto& pool = iter->second;
 	auto stub = pool->GetConnection();
-	spdlog::info("[FriendGrpcClient] Calling SendFriend from applicant: {} to recipient: {} on {}", request.applicant(), request.recipient(), server_ip);
+	LOG_INFO("Calling SendFriend from applicant: {} to recipient: {} on {}", request.applicant(), request.recipient(), server_ip);
 	auto status = stub->SendFriend(&context, request, &response);
 
 	if (!status.ok()) {
 		response.set_error(static_cast<int>(ErrorCodes::RPC_FAILED));
-		spdlog::error("[FriendGrpcClient] gRPC SendFriend Failed:{}", status.error_message());
+		LOG_ERROR("gRPC SendFriend Failed:{}", status.error_message());
 		return response;
 	}
-	spdlog::debug("[FriendGrpcClient] gRPC FriendGrpcClient succeeded from applicant: {} to recipient: {} on {}", request.applicant(), request.recipient());
+	LOG_DEBUG("gRPC FriendGrpcClient succeeded from applicant: {} to recipient: {} on {}", request.applicant(), request.recipient());
 	pool->ReturnConnection(std::move(stub));
 
 	return response;

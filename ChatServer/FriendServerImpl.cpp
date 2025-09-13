@@ -2,10 +2,10 @@
 #include "UserManager.h"
 #include "CSession.h"
 #include "const.h"
-#include <nlohmann/json.hpp>
-#include <spdlog/spdlog.h>
+#include "Logger.h"
 #include "Defer.h"
 
+#include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
 FriendServerImpl::FriendServerImpl()
@@ -18,7 +18,7 @@ grpc::Status FriendServerImpl::SendFriend(grpc::ServerContext* context, const me
 	auto applicant = request->applicant();
 	auto recipient = request->recipient();
 
-	spdlog::info("[FriendServerImpl] Recived friend request from {} to {}", applicant, recipient);
+	LOG_INFO("Recived friend request from {} to {}", applicant, recipient);
 	auto session = UserManager::GetInstance()->GetSession(request->recipient());
 
 

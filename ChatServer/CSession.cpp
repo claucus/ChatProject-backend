@@ -1,11 +1,10 @@
-#include "CSession.h"
+﻿#include "CSession.h"
 #include "CServer.h"
 #include "LogicNode.h"
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include "LogicSystem.h"
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/rotating_file_sink.h>
+#include "Logger.h"
 
 CSession::CSession(boost::asio::io_context& ioc, CServer* server) :
 	_socket(ioc),
@@ -15,7 +14,7 @@ CSession::CSession(boost::asio::io_context& ioc, CServer* server) :
 {
 	auto a_uuid = boost::uuids::random_generator()();
 	_uid = boost::uuids::to_string(a_uuid);
-	spdlog::info("[Session {}] Created new session", _uid);
+	LOG_INFO("Session: {}, Created new session", _uid);
 
 	_receiveHeadNode = std::make_shared<ReceiveNode>(HEADER_TOTAL_LENGTH, 0);
 	_receiveMessageNode = nullptr;
@@ -23,7 +22,7 @@ CSession::CSession(boost::asio::io_context& ioc, CServer* server) :
 
 CSession::~CSession()
 {
-	spdlog::info("[Session {}] Destroying session", _uid);
+	LOG_INFO("Session: {}, Destroying session", _uid);
 	Close();
 }
 
@@ -44,7 +43,7 @@ void CSession::SetUid(const std::string& uid)
 
 void CSession::Start()
 {
-	spdlog::info("[Session {}] Starting session", _uid);
+	LOG_INFO("Session: {}, Starting session", _uid);
 	auto self = Shared();
 	_socket.async_read_some(
 		boost::asio::buffer(_buffer, BUFFER_SIZE),
@@ -55,7 +54,7 @@ void CSession::Start()
 void CSession::Close()
 {
 	if (!_b_close) {
-		spdlog::info("[Session {}] Closing session", _uid);
+		LOG_INFO("Session: {}, Closing session", _uid);
 		_b_close = true;
 		boost::system::error_code ec;
 		_socket.close(ec);
@@ -73,7 +72,7 @@ void CSession::Send(char* message, size_t maxLength, size_t messageId)
 		_sendQueue.push(node);
 	}
 	
-	spdlog::debug("[Session {}] Queued message for sending, ID: {}, Length: {}", 
+	LOG_DEBUG("Session: {}, Queued message for sending, ID: {}, Length: {}", 
 				  _uid, messageId, maxLength);
 	
 	auto self = Shared();
@@ -93,12 +92,12 @@ std::shared_ptr<CSession> CSession::Shared()
 void CSession::handleRead(const boost::system::error_code& error, size_t bytesTransferred, std::shared_ptr<CSession> self)
 {
 	if (error) {
-		spdlog::error("[Session {}] Read error: {}", _uid, error.message());
+		LOG_ERROR("Session: {}, Read error: {}", _uid, error.message());
 		Close();
 		return;
 	}
 
-	spdlog::trace("[Session {}] Received {} bytes", _uid, bytesTransferred);
+	LOG_INFO("Session: {}, Received {} bytes", _uid, bytesTransferred);
 
 	size_t proceessBytes = 0;
 	while (proceessBytes < bytesTransferred) {
@@ -122,11 +121,11 @@ void CSession::handleRead(const boost::system::error_code& error, size_t bytesTr
 				messageId = boost::asio::detail::socket_ops::network_to_host_short(messageId);
 				messageLength = boost::asio::detail::socket_ops::network_to_host_short(messageLength);
 
-				spdlog::debug("[Session {}] Header parsed - Message ID: {}, Length: {}", 
+				LOG_DEBUG("Session: {}, Header parsed - Message ID: {}, Length: {}", 
 							_uid, messageId, messageLength);
 
 				if (messageLength > MAX_LENGTH) {
-					spdlog::error("[Session {}] Message length {} exceeds maximum allowed {}", 
+					LOG_ERROR("Session: {}, Message length {} exceeds maximum allowed {}", 
 								_uid, messageLength, MAX_LENGTH);
 					Close();
 					return;
@@ -150,7 +149,7 @@ void CSession::handleRead(const boost::system::error_code& error, size_t bytesTr
 			proceessBytes += bytesToCopy;
 
 			if (_receiveMessageNode->_currentLength == _receiveMessageNode->_totalLength) {
-				spdlog::debug("[Session {}] Message fully received, posting to LogicSystem", _uid);
+				LOG_DEBUG("Session: {}, Message fully received, posting to LogicSystem", _uid);
 				
 				auto logicNode = std::make_shared<LogicNode>(self, _receiveMessageNode);
 				LogicSystem::GetInstance()->PostMessageToQueue(logicNode);
@@ -170,7 +169,7 @@ void CSession::handleRead(const boost::system::error_code& error, size_t bytesTr
 void CSession::handleWrite(const boost::system::error_code& error, std::shared_ptr<CSession> self)
 {
 	if (error) {
-		spdlog::error("[Session {}] Write error: {}", _uid, error.message());
+		LOG_ERROR("Session: {}, Write error: {}", _uid, error.message());
 		Close();
 		return;
 	}
@@ -186,7 +185,7 @@ void CSession::handleWrite(const boost::system::error_code& error, std::shared_p
 		_sendQueue.pop();
 	}
 
-	spdlog::debug("[Session {}] Sending message, ID: {}, Length: {}", 
+	LOG_DEBUG("Session: {}, Sending message, ID: {}, Length: {}", 
 				  _uid, node->GetId(), node->_totalLength);
 
 	boost::asio::async_write(
