@@ -86,38 +86,31 @@ grpc::Status StatusServerImpl::GetChatServer(grpc::ServerContext* context,
 ChatServer StatusServerImpl::GetChatServer()
 {
     std::lock_guard<std::mutex> lock(_serverMutex);
-    auto minServer = _servers.begin()->second;
 
-    auto count = RedisConPool::GetInstance().hget(ChatServiceConstant::LOGIN_COUNT, minServer.name).value();
-    if (count.empty()) {
-        minServer.con_count = INT_MAX;
+    ChatServer* minServer = nullptr;
+    auto minCount = INT_MAX;
+
+    for (auto& [name, server] : _servers) {
+        auto cnt = RedisConPool::GetInstance().hget(ChatServiceConstant::LOGIN_COUNT,server.name).value();
+
+        int count = cnt.empty() ? 0 : std::stoi(cnt);
+        server.con_count = count;
+
+        if (count < minCount) {
+            minCount = count;
+            minServer = &server;
+        }
+    }
+
+    if (minServer) {
+        LOG_DEBUG("Selected chat server {} with {} connections", minServer->name, minServer->con_count);
+        return *minServer;
     }
     else {
-		minServer.con_count = std::stoi(count);
+        auto it = _servers.begin();
+		LOG_WARN("No servers available, defaulting to first server: {}", it->second.name);
+        return it->second;
     }
-
-
-    for (auto& server : _servers) {
-
-        if (server.second.name == minServer.name) {
-            continue;
-        }
-
-		auto count = RedisConPool::GetInstance().hget(ChatServiceConstant::LOGIN_COUNT, server.second.name).value();
-        if (count.empty()) {
-            server.second.con_count = INT_MAX;
-        }
-        else {
-			server.second.con_count = std::stoi(count);
-        }
-
-        if (server.second.con_count < minServer.con_count) {
-            minServer = server.second;
-        }
-    }
-
-    LOG_DEBUG("Selected chat server {} with {} connections", minServer.name, minServer.con_count);
-    return minServer;
 }
 
 grpc::Status StatusServerImpl::Login(grpc::ServerContext* context, 
