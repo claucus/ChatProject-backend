@@ -245,6 +245,9 @@ inline constexpr FriendRequest::Impl_::Impl_(
         recipient_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
+        username_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
         avatar_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
@@ -307,17 +310,18 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 
 inline constexpr FriendApprovalRequest::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
-      : request_id_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        applicant_(
+      : applicant_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
         recipient_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        approved_time_{::int64_t{0}},
-        is_approved_{false},
+        grouping_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        remark_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
         _cached_size_{0} {}
 
 template <typename>
@@ -419,6 +423,7 @@ const ::uint32_t
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::message::FriendRequest, _impl_.applicant_),
         PROTOBUF_FIELD_OFFSET(::message::FriendRequest, _impl_.recipient_),
+        PROTOBUF_FIELD_OFFSET(::message::FriendRequest, _impl_.username_),
         PROTOBUF_FIELD_OFFSET(::message::FriendRequest, _impl_.avatar_),
         PROTOBUF_FIELD_OFFSET(::message::FriendRequest, _impl_.message_),
         PROTOBUF_FIELD_OFFSET(::message::FriendRequest, _impl_.time_),
@@ -441,11 +446,10 @@ const ::uint32_t
         ~0u,  // no _inlined_string_donated_
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::message::FriendApprovalRequest, _impl_.request_id_),
         PROTOBUF_FIELD_OFFSET(::message::FriendApprovalRequest, _impl_.applicant_),
         PROTOBUF_FIELD_OFFSET(::message::FriendApprovalRequest, _impl_.recipient_),
-        PROTOBUF_FIELD_OFFSET(::message::FriendApprovalRequest, _impl_.is_approved_),
-        PROTOBUF_FIELD_OFFSET(::message::FriendApprovalRequest, _impl_.approved_time_),
+        PROTOBUF_FIELD_OFFSET(::message::FriendApprovalRequest, _impl_.grouping_),
+        PROTOBUF_FIELD_OFFSET(::message::FriendApprovalRequest, _impl_.remark_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::message::FriendApprovalResponse, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -468,8 +472,8 @@ static const ::_pbi::MigrationSchema
         {41, -1, -1, sizeof(::message::LoginRequest)},
         {51, -1, -1, sizeof(::message::LoginResponse)},
         {62, -1, -1, sizeof(::message::FriendRequest)},
-        {75, -1, -1, sizeof(::message::FriendResponse)},
-        {86, -1, -1, sizeof(::message::FriendApprovalRequest)},
+        {76, -1, -1, sizeof(::message::FriendResponse)},
+        {87, -1, -1, sizeof(::message::FriendApprovalRequest)},
         {99, -1, -1, sizeof(::message::FriendApprovalResponse)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
@@ -494,33 +498,33 @@ const char descriptor_table_protodef_message_2eproto[] ABSL_ATTRIBUTE_SECTION_VA
     "\005\022\014\n\004host\030\002 \001(\t\022\014\n\004port\030\003 \001(\t\022\r\n\005token\030\004"
     " \001(\t\"*\n\014LoginRequest\022\013\n\003uid\030\001 \001(\t\022\r\n\005tok"
     "en\030\002 \001(\t\":\n\rLoginResponse\022\r\n\005error\030\001 \001(\005"
-    "\022\013\n\003uid\030\002 \001(\t\022\r\n\005token\030\003 \001(\t\"d\n\rFriendRe"
+    "\022\013\n\003uid\030\002 \001(\t\022\r\n\005token\030\003 \001(\t\"v\n\rFriendRe"
     "quest\022\021\n\tapplicant\030\001 \001(\t\022\021\n\trecipient\030\002 "
-    "\001(\t\022\016\n\006avatar\030\003 \001(\t\022\017\n\007message\030\004 \001(\t\022\014\n\004"
-    "time\030\005 \001(\003\"E\n\016FriendResponse\022\r\n\005error\030\001 "
-    "\001(\005\022\021\n\tapplicant\030\002 \001(\t\022\021\n\trecipient\030\003 \001("
-    "\t\"}\n\025FriendApprovalRequest\022\022\n\nrequest_id"
-    "\030\001 \001(\t\022\021\n\tapplicant\030\002 \001(\t\022\021\n\trecipient\030\003"
-    " \001(\t\022\023\n\013is_approved\030\004 \001(\010\022\025\n\rapproved_ti"
-    "me\030\005 \001(\003\"M\n\026FriendApprovalResponse\022\r\n\005er"
-    "ror\030\001 \001(\005\022\021\n\tapplicant\030\002 \001(\t\022\021\n\trecipien"
-    "t\030\003 \001(\t2Y\n\rVerifyService\022H\n\rGetVerifyCod"
-    "e\022\031.message.GetVerifyRequest\032\032.message.G"
-    "etVerifyResponse\"\0002\231\001\n\rStatusService\022P\n\r"
-    "GetChatServer\022\035.message.GetChatServerReq"
-    "uest\032\036.message.GetChatServerResponse\"\000\0226"
-    "\n\005Login\022\025.message.LoginRequest\032\026.message"
-    ".LoginResponse2\243\001\n\rFriendService\022\?\n\nSend"
-    "Friend\022\026.message.FriendRequest\032\027.message"
-    ".FriendResponse\"\000\022Q\n\014HandleFriend\022\036.mess"
-    "age.FriendApprovalRequest\032\037.message.Frie"
-    "ndApprovalResponse\"\000b\006proto3"
+    "\001(\t\022\020\n\010username\030\003 \001(\t\022\016\n\006avatar\030\004 \001(\t\022\017\n"
+    "\007message\030\005 \001(\t\022\014\n\004time\030\006 \001(\003\"E\n\016FriendRe"
+    "sponse\022\r\n\005error\030\001 \001(\005\022\021\n\tapplicant\030\002 \001(\t"
+    "\022\021\n\trecipient\030\003 \001(\t\"_\n\025FriendApprovalReq"
+    "uest\022\021\n\tapplicant\030\001 \001(\t\022\021\n\trecipient\030\002 \001"
+    "(\t\022\020\n\010grouping\030\003 \001(\t\022\016\n\006remark\030\004 \001(\t\"M\n\026"
+    "FriendApprovalResponse\022\r\n\005error\030\001 \001(\005\022\021\n"
+    "\tapplicant\030\002 \001(\t\022\021\n\trecipient\030\003 \001(\t2Y\n\rV"
+    "erifyService\022H\n\rGetVerifyCode\022\031.message."
+    "GetVerifyRequest\032\032.message.GetVerifyResp"
+    "onse\"\0002\231\001\n\rStatusService\022P\n\rGetChatServe"
+    "r\022\035.message.GetChatServerRequest\032\036.messa"
+    "ge.GetChatServerResponse\"\000\0226\n\005Login\022\025.me"
+    "ssage.LoginRequest\032\026.message.LoginRespon"
+    "se2\243\001\n\rFriendService\022\?\n\nSendFriend\022\026.mes"
+    "sage.FriendRequest\032\027.message.FriendRespo"
+    "nse\"\000\022Q\n\014HandleFriend\022\036.message.FriendAp"
+    "provalRequest\032\037.message.FriendApprovalRe"
+    "sponse\"\000b\006proto3"
 };
 static ::absl::once_flag descriptor_table_message_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_message_2eproto = {
     false,
     false,
-    1148,
+    1136,
     descriptor_table_protodef_message_2eproto,
     "message.proto",
     &descriptor_table_message_2eproto_once,
@@ -2161,6 +2165,7 @@ inline PROTOBUF_NDEBUG_INLINE FriendRequest::Impl_::Impl_(
     const Impl_& from, const ::message::FriendRequest& from_msg)
       : applicant_(arena, from.applicant_),
         recipient_(arena, from.recipient_),
+        username_(arena, from.username_),
         avatar_(arena, from.avatar_),
         message_(arena, from.message_),
         _cached_size_{0} {}
@@ -2187,6 +2192,7 @@ inline PROTOBUF_NDEBUG_INLINE FriendRequest::Impl_::Impl_(
     ::google::protobuf::Arena* arena)
       : applicant_(arena),
         recipient_(arena),
+        username_(arena),
         avatar_(arena),
         message_(arena),
         _cached_size_{0} {}
@@ -2205,6 +2211,7 @@ inline void FriendRequest::SharedDtor(MessageLite& self) {
   ABSL_DCHECK(this_.GetArena() == nullptr);
   this_._impl_.applicant_.Destroy();
   this_._impl_.recipient_.Destroy();
+  this_._impl_.username_.Destroy();
   this_._impl_.avatar_.Destroy();
   this_._impl_.message_.Destroy();
   this_._impl_.~Impl_();
@@ -2246,15 +2253,15 @@ const ::google::protobuf::internal::ClassData* FriendRequest::GetClassData() con
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 5, 0, 61, 2> FriendRequest::_table_ = {
+const ::_pbi::TcParseTable<3, 6, 0, 69, 2> FriendRequest::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    5, 56,  // max_field_number, fast_idx_mask
+    6, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967264,  // skipmap
+    4294967232,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    5,  // num_field_entries
+    6,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     _class_data_.base(),
@@ -2271,16 +2278,18 @@ const ::_pbi::TcParseTable<3, 5, 0, 61, 2> FriendRequest::_table_ = {
     // string recipient = 2;
     {::_pbi::TcParser::FastUS1,
      {18, 63, 0, PROTOBUF_FIELD_OFFSET(FriendRequest, _impl_.recipient_)}},
-    // string avatar = 3;
+    // string username = 3;
     {::_pbi::TcParser::FastUS1,
-     {26, 63, 0, PROTOBUF_FIELD_OFFSET(FriendRequest, _impl_.avatar_)}},
-    // string message = 4;
+     {26, 63, 0, PROTOBUF_FIELD_OFFSET(FriendRequest, _impl_.username_)}},
+    // string avatar = 4;
     {::_pbi::TcParser::FastUS1,
-     {34, 63, 0, PROTOBUF_FIELD_OFFSET(FriendRequest, _impl_.message_)}},
-    // int64 time = 5;
+     {34, 63, 0, PROTOBUF_FIELD_OFFSET(FriendRequest, _impl_.avatar_)}},
+    // string message = 5;
+    {::_pbi::TcParser::FastUS1,
+     {42, 63, 0, PROTOBUF_FIELD_OFFSET(FriendRequest, _impl_.message_)}},
+    // int64 time = 6;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(FriendRequest, _impl_.time_), 63>(),
-     {40, 63, 0, PROTOBUF_FIELD_OFFSET(FriendRequest, _impl_.time_)}},
-    {::_pbi::TcParser::MiniParse, {}},
+     {48, 63, 0, PROTOBUF_FIELD_OFFSET(FriendRequest, _impl_.time_)}},
     {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
@@ -2291,22 +2300,26 @@ const ::_pbi::TcParseTable<3, 5, 0, 61, 2> FriendRequest::_table_ = {
     // string recipient = 2;
     {PROTOBUF_FIELD_OFFSET(FriendRequest, _impl_.recipient_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string avatar = 3;
+    // string username = 3;
+    {PROTOBUF_FIELD_OFFSET(FriendRequest, _impl_.username_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string avatar = 4;
     {PROTOBUF_FIELD_OFFSET(FriendRequest, _impl_.avatar_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string message = 4;
+    // string message = 5;
     {PROTOBUF_FIELD_OFFSET(FriendRequest, _impl_.message_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // int64 time = 5;
+    // int64 time = 6;
     {PROTOBUF_FIELD_OFFSET(FriendRequest, _impl_.time_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt64)},
   }},
   // no aux_entries
   {{
-    "\25\11\11\6\7\0\0\0"
+    "\25\11\11\10\6\7\0\0"
     "message.FriendRequest"
     "applicant"
     "recipient"
+    "username"
     "avatar"
     "message"
   }},
@@ -2321,6 +2334,7 @@ PROTOBUF_NOINLINE void FriendRequest::Clear() {
 
   _impl_.applicant_.ClearToEmpty();
   _impl_.recipient_.ClearToEmpty();
+  _impl_.username_.ClearToEmpty();
   _impl_.avatar_.ClearToEmpty();
   _impl_.message_.ClearToEmpty();
   _impl_.time_ = ::int64_t{0};
@@ -2358,26 +2372,34 @@ PROTOBUF_NOINLINE void FriendRequest::Clear() {
             target = stream->WriteStringMaybeAliased(2, _s, target);
           }
 
-          // string avatar = 3;
+          // string username = 3;
+          if (!this_._internal_username().empty()) {
+            const std::string& _s = this_._internal_username();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "message.FriendRequest.username");
+            target = stream->WriteStringMaybeAliased(3, _s, target);
+          }
+
+          // string avatar = 4;
           if (!this_._internal_avatar().empty()) {
             const std::string& _s = this_._internal_avatar();
             ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
                 _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "message.FriendRequest.avatar");
-            target = stream->WriteStringMaybeAliased(3, _s, target);
+            target = stream->WriteStringMaybeAliased(4, _s, target);
           }
 
-          // string message = 4;
+          // string message = 5;
           if (!this_._internal_message().empty()) {
             const std::string& _s = this_._internal_message();
             ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
                 _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "message.FriendRequest.message");
-            target = stream->WriteStringMaybeAliased(4, _s, target);
+            target = stream->WriteStringMaybeAliased(5, _s, target);
           }
 
-          // int64 time = 5;
+          // int64 time = 6;
           if (this_._internal_time() != 0) {
             target = ::google::protobuf::internal::WireFormatLite::
-                WriteInt64ToArrayWithField<5>(
+                WriteInt64ToArrayWithField<6>(
                     stream, this_._internal_time(), target);
           }
 
@@ -2416,17 +2438,22 @@ PROTOBUF_NOINLINE void FriendRequest::Clear() {
               total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                               this_._internal_recipient());
             }
-            // string avatar = 3;
+            // string username = 3;
+            if (!this_._internal_username().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_username());
+            }
+            // string avatar = 4;
             if (!this_._internal_avatar().empty()) {
               total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                               this_._internal_avatar());
             }
-            // string message = 4;
+            // string message = 5;
             if (!this_._internal_message().empty()) {
               total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                               this_._internal_message());
             }
-            // int64 time = 5;
+            // int64 time = 6;
             if (this_._internal_time() != 0) {
               total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
                   this_._internal_time());
@@ -2449,6 +2476,9 @@ void FriendRequest::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::g
   }
   if (!from._internal_recipient().empty()) {
     _this->_internal_set_recipient(from._internal_recipient());
+  }
+  if (!from._internal_username().empty()) {
+    _this->_internal_set_username(from._internal_username());
   }
   if (!from._internal_avatar().empty()) {
     _this->_internal_set_avatar(from._internal_avatar());
@@ -2477,6 +2507,7 @@ void FriendRequest::InternalSwap(FriendRequest* PROTOBUF_RESTRICT other) {
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.applicant_, &other->_impl_.applicant_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.recipient_, &other->_impl_.recipient_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.username_, &other->_impl_.username_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.avatar_, &other->_impl_.avatar_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.message_, &other->_impl_.message_, arena);
         swap(_impl_.time_, other->_impl_.time_);
@@ -2789,9 +2820,10 @@ FriendApprovalRequest::FriendApprovalRequest(::google::protobuf::Arena* arena)
 inline PROTOBUF_NDEBUG_INLINE FriendApprovalRequest::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
     const Impl_& from, const ::message::FriendApprovalRequest& from_msg)
-      : request_id_(arena, from.request_id_),
-        applicant_(arena, from.applicant_),
+      : applicant_(arena, from.applicant_),
         recipient_(arena, from.recipient_),
+        grouping_(arena, from.grouping_),
+        remark_(arena, from.remark_),
         _cached_size_{0} {}
 
 FriendApprovalRequest::FriendApprovalRequest(
@@ -2807,32 +2839,20 @@ FriendApprovalRequest::FriendApprovalRequest(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  ::memcpy(reinterpret_cast<char *>(&_impl_) +
-               offsetof(Impl_, approved_time_),
-           reinterpret_cast<const char *>(&from._impl_) +
-               offsetof(Impl_, approved_time_),
-           offsetof(Impl_, is_approved_) -
-               offsetof(Impl_, approved_time_) +
-               sizeof(Impl_::is_approved_));
 
   // @@protoc_insertion_point(copy_constructor:message.FriendApprovalRequest)
 }
 inline PROTOBUF_NDEBUG_INLINE FriendApprovalRequest::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
     ::google::protobuf::Arena* arena)
-      : request_id_(arena),
-        applicant_(arena),
+      : applicant_(arena),
         recipient_(arena),
+        grouping_(arena),
+        remark_(arena),
         _cached_size_{0} {}
 
 inline void FriendApprovalRequest::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  ::memset(reinterpret_cast<char *>(&_impl_) +
-               offsetof(Impl_, approved_time_),
-           0,
-           offsetof(Impl_, is_approved_) -
-               offsetof(Impl_, approved_time_) +
-               sizeof(Impl_::is_approved_));
 }
 FriendApprovalRequest::~FriendApprovalRequest() {
   // @@protoc_insertion_point(destructor:message.FriendApprovalRequest)
@@ -2842,9 +2862,10 @@ inline void FriendApprovalRequest::SharedDtor(MessageLite& self) {
   FriendApprovalRequest& this_ = static_cast<FriendApprovalRequest&>(self);
   this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   ABSL_DCHECK(this_.GetArena() == nullptr);
-  this_._impl_.request_id_.Destroy();
   this_._impl_.applicant_.Destroy();
   this_._impl_.recipient_.Destroy();
+  this_._impl_.grouping_.Destroy();
+  this_._impl_.remark_.Destroy();
   this_._impl_.~Impl_();
 }
 
@@ -2884,15 +2905,15 @@ const ::google::protobuf::internal::ClassData* FriendApprovalRequest::GetClassDa
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 5, 0, 66, 2> FriendApprovalRequest::_table_ = {
+const ::_pbi::TcParseTable<2, 4, 0, 70, 2> FriendApprovalRequest::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    5, 56,  // max_field_number, fast_idx_mask
+    4, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967264,  // skipmap
+    4294967280,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    5,  // num_field_entries
+    4,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     _class_data_.base(),
@@ -2902,50 +2923,42 @@ const ::_pbi::TcParseTable<3, 5, 0, 66, 2> FriendApprovalRequest::_table_ = {
     ::_pbi::TcParser::GetTable<::message::FriendApprovalRequest>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    {::_pbi::TcParser::MiniParse, {}},
-    // string request_id = 1;
+    // string remark = 4;
     {::_pbi::TcParser::FastUS1,
-     {10, 63, 0, PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.request_id_)}},
-    // string applicant = 2;
+     {34, 63, 0, PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.remark_)}},
+    // string applicant = 1;
     {::_pbi::TcParser::FastUS1,
-     {18, 63, 0, PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.applicant_)}},
-    // string recipient = 3;
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.applicant_)}},
+    // string recipient = 2;
     {::_pbi::TcParser::FastUS1,
-     {26, 63, 0, PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.recipient_)}},
-    // bool is_approved = 4;
-    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(FriendApprovalRequest, _impl_.is_approved_), 63>(),
-     {32, 63, 0, PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.is_approved_)}},
-    // int64 approved_time = 5;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(FriendApprovalRequest, _impl_.approved_time_), 63>(),
-     {40, 63, 0, PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.approved_time_)}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.recipient_)}},
+    // string grouping = 3;
+    {::_pbi::TcParser::FastUS1,
+     {26, 63, 0, PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.grouping_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // string request_id = 1;
-    {PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.request_id_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string applicant = 2;
+    // string applicant = 1;
     {PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.applicant_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string recipient = 3;
+    // string recipient = 2;
     {PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.recipient_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // bool is_approved = 4;
-    {PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.is_approved_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
-    // int64 approved_time = 5;
-    {PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.approved_time_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kInt64)},
+    // string grouping = 3;
+    {PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.grouping_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string remark = 4;
+    {PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.remark_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
   // no aux_entries
   {{
-    "\35\12\11\11\0\0\0\0"
+    "\35\11\11\10\6\0\0\0"
     "message.FriendApprovalRequest"
-    "request_id"
     "applicant"
     "recipient"
+    "grouping"
+    "remark"
   }},
 };
 
@@ -2956,12 +2969,10 @@ PROTOBUF_NOINLINE void FriendApprovalRequest::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.request_id_.ClearToEmpty();
   _impl_.applicant_.ClearToEmpty();
   _impl_.recipient_.ClearToEmpty();
-  ::memset(&_impl_.approved_time_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.is_approved_) -
-      reinterpret_cast<char*>(&_impl_.approved_time_)) + sizeof(_impl_.is_approved_));
+  _impl_.grouping_.ClearToEmpty();
+  _impl_.remark_.ClearToEmpty();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -2980,42 +2991,36 @@ PROTOBUF_NOINLINE void FriendApprovalRequest::Clear() {
           ::uint32_t cached_has_bits = 0;
           (void)cached_has_bits;
 
-          // string request_id = 1;
-          if (!this_._internal_request_id().empty()) {
-            const std::string& _s = this_._internal_request_id();
-            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "message.FriendApprovalRequest.request_id");
-            target = stream->WriteStringMaybeAliased(1, _s, target);
-          }
-
-          // string applicant = 2;
+          // string applicant = 1;
           if (!this_._internal_applicant().empty()) {
             const std::string& _s = this_._internal_applicant();
             ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
                 _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "message.FriendApprovalRequest.applicant");
-            target = stream->WriteStringMaybeAliased(2, _s, target);
+            target = stream->WriteStringMaybeAliased(1, _s, target);
           }
 
-          // string recipient = 3;
+          // string recipient = 2;
           if (!this_._internal_recipient().empty()) {
             const std::string& _s = this_._internal_recipient();
             ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
                 _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "message.FriendApprovalRequest.recipient");
+            target = stream->WriteStringMaybeAliased(2, _s, target);
+          }
+
+          // string grouping = 3;
+          if (!this_._internal_grouping().empty()) {
+            const std::string& _s = this_._internal_grouping();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "message.FriendApprovalRequest.grouping");
             target = stream->WriteStringMaybeAliased(3, _s, target);
           }
 
-          // bool is_approved = 4;
-          if (this_._internal_is_approved() != 0) {
-            target = stream->EnsureSpace(target);
-            target = ::_pbi::WireFormatLite::WriteBoolToArray(
-                4, this_._internal_is_approved(), target);
-          }
-
-          // int64 approved_time = 5;
-          if (this_._internal_approved_time() != 0) {
-            target = ::google::protobuf::internal::WireFormatLite::
-                WriteInt64ToArrayWithField<5>(
-                    stream, this_._internal_approved_time(), target);
+          // string remark = 4;
+          if (!this_._internal_remark().empty()) {
+            const std::string& _s = this_._internal_remark();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "message.FriendApprovalRequest.remark");
+            target = stream->WriteStringMaybeAliased(4, _s, target);
           }
 
           if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
@@ -3043,29 +3048,25 @@ PROTOBUF_NOINLINE void FriendApprovalRequest::Clear() {
 
           ::_pbi::Prefetch5LinesFrom7Lines(&this_);
            {
-            // string request_id = 1;
-            if (!this_._internal_request_id().empty()) {
-              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                              this_._internal_request_id());
-            }
-            // string applicant = 2;
+            // string applicant = 1;
             if (!this_._internal_applicant().empty()) {
               total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                               this_._internal_applicant());
             }
-            // string recipient = 3;
+            // string recipient = 2;
             if (!this_._internal_recipient().empty()) {
               total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                               this_._internal_recipient());
             }
-            // int64 approved_time = 5;
-            if (this_._internal_approved_time() != 0) {
-              total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
-                  this_._internal_approved_time());
+            // string grouping = 3;
+            if (!this_._internal_grouping().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_grouping());
             }
-            // bool is_approved = 4;
-            if (this_._internal_is_approved() != 0) {
-              total_size += 2;
+            // string remark = 4;
+            if (!this_._internal_remark().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_remark());
             }
           }
           return this_.MaybeComputeUnknownFieldsSize(total_size,
@@ -3080,20 +3081,17 @@ void FriendApprovalRequest::MergeImpl(::google::protobuf::MessageLite& to_msg, c
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (!from._internal_request_id().empty()) {
-    _this->_internal_set_request_id(from._internal_request_id());
-  }
   if (!from._internal_applicant().empty()) {
     _this->_internal_set_applicant(from._internal_applicant());
   }
   if (!from._internal_recipient().empty()) {
     _this->_internal_set_recipient(from._internal_recipient());
   }
-  if (from._internal_approved_time() != 0) {
-    _this->_impl_.approved_time_ = from._impl_.approved_time_;
+  if (!from._internal_grouping().empty()) {
+    _this->_internal_set_grouping(from._internal_grouping());
   }
-  if (from._internal_is_approved() != 0) {
-    _this->_impl_.is_approved_ = from._impl_.is_approved_;
+  if (!from._internal_remark().empty()) {
+    _this->_internal_set_remark(from._internal_remark());
   }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -3111,15 +3109,10 @@ void FriendApprovalRequest::InternalSwap(FriendApprovalRequest* PROTOBUF_RESTRIC
   auto* arena = GetArena();
   ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.request_id_, &other->_impl_.request_id_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.applicant_, &other->_impl_.applicant_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.recipient_, &other->_impl_.recipient_, arena);
-  ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.is_approved_)
-      + sizeof(FriendApprovalRequest::_impl_.is_approved_)
-      - PROTOBUF_FIELD_OFFSET(FriendApprovalRequest, _impl_.approved_time_)>(
-          reinterpret_cast<char*>(&_impl_.approved_time_),
-          reinterpret_cast<char*>(&other->_impl_.approved_time_));
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.grouping_, &other->_impl_.grouping_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.remark_, &other->_impl_.remark_, arena);
 }
 
 ::google::protobuf::Metadata FriendApprovalRequest::GetMetadata() const {

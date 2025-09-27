@@ -12,12 +12,12 @@
 
 LogicSystem::~LogicSystem()
 {
-    LOG_INFO("[LogicSystem] Destructor called, stopping message processing...");
+    LOG_INFO("Destructor called, stopping message processing...");
     _b_stop = true;
     _consume.notify_one();
     if (_thread.joinable()) {
         _thread.join();
-        LOG_INFO("[LogicSystem] Worker thread joined successfully");
+        LOG_INFO("Worker thread joined successfully");
     }
 }
 
@@ -25,27 +25,27 @@ void LogicSystem::PostMessageToQueue(std::shared_ptr<LogicNode> message)
 {
     std::unique_lock<std::mutex> lock(_mutex);
     _messageQueue.push(message);
-    LOG_DEBUG("[LogicSystem] Message queued, queue size: {}", _messageQueue.size());
+    LOG_DEBUG("Message queued, queue size: {}", _messageQueue.size());
 
     if (_messageQueue.size() == 1) {
         lock.unlock();
         _consume.notify_one();
-        LOG_DEBUG("[LogicSystem] Consumer thread notified");
+        LOG_DEBUG("Consumer thread notified");
     }
 }
 
 LogicSystem::LogicSystem():
     _b_stop(false)
 {
-    LOG_INFO("[LogicSystem] Initializing...");
+    LOG_INFO("Initializing...");
     RegisterCallBack();
     _thread = std::thread(&LogicSystem::DealMessage, this);
-    LOG_INFO("[LogicSystem] Worker thread started");
+    LOG_INFO("Worker thread started");
 }
 
 void LogicSystem::DealMessage()
 {
-    LOG_INFO("[LogicSystem] Message processing thread started");
+    LOG_INFO("Message processing thread started");
     while (true) {
         std::unique_lock<std::mutex> lock(_mutex);
         while (_messageQueue.empty() && !_b_stop) {
@@ -53,13 +53,13 @@ void LogicSystem::DealMessage()
         }
 
         if (_b_stop) {
-            LOG_INFO("[LogicSystem] Stopping message processing, remaining messages: {}", _messageQueue.size());
+            LOG_INFO("Stopping message processing, remaining messages: {}", _messageQueue.size());
             while (!_messageQueue.empty()) {
                 auto messageNode = _messageQueue.front();
 
                 auto callBackIter = _funcCallBack.find(messageNode->_receiveNode->GetId());
                 if (callBackIter == _funcCallBack.end()) {
-                    LOG_WARN("[LogicSystem] No callback found for message ID: {}", messageNode->_receiveNode->GetId());
+                    LOG_WARN("No callback found for message ID: {}", messageNode->_receiveNode->GetId());
                     _messageQueue.pop();
                     continue;
                 }
@@ -75,11 +75,11 @@ void LogicSystem::DealMessage()
         }
 
         auto messageNode = _messageQueue.front();
-        LOG_DEBUG("[LogicSystem] Processing message ID: {}", messageNode->_receiveNode->GetId());
+        LOG_DEBUG("Processing message ID: {}", messageNode->_receiveNode->GetId());
 
         auto callBackIter = _funcCallBack.find(messageNode->_receiveNode->GetId());
         if (callBackIter == _funcCallBack.end()) {
-            LOG_WARN("[LogicSystem] No handler registered for message ID: {}", messageNode->_receiveNode->GetId());
+            LOG_WARN("No handler registered for message ID: {}", messageNode->_receiveNode->GetId());
             _messageQueue.pop();
             continue;
         }
@@ -89,19 +89,19 @@ void LogicSystem::DealMessage()
             std::string(messageNode->_receiveNode->_data, messageNode->_receiveNode->_currentLength)
         );
         _messageQueue.pop();
-        LOG_DEBUG("[LogicSystem] Message processed, remaining queue size: {}", _messageQueue.size());
+        LOG_DEBUG("Message processed, remaining queue size: {}", _messageQueue.size());
     }
 }
 
 void LogicSystem::RegisterCallBack()
 {
-    LOG_INFO("[LogicSystem] Registering message callbacks...");
+    LOG_INFO("Registering message callbacks...");
     auto id = static_cast<size_t>(MessageID::MESSAGE_CHAT_LOGIN);
     _funcCallBack[id] = std::bind(&LogicSystem::LoginHandler,this,
             std::placeholders::_1,
             std::placeholders::_2,
             std::placeholders::_3);
-    LOG_INFO("[LogicSystem] Registered login handler for message ID: {}", id);
+    LOG_INFO("Registered login handler for message ID: {}", id);
 
 
     id = static_cast<size_t>(MessageID::MESSAGE_GET_SEARCH_USER);
@@ -109,7 +109,7 @@ void LogicSystem::RegisterCallBack()
             std::placeholders::_1,
             std::placeholders::_2,
             std::placeholders::_3);
-    LOG_INFO("[LogicSystem] Registered search handler for message ID: {}", id);
+    LOG_INFO("Registered search handler for message ID: {}", id);
 
 
     id = static_cast<size_t>(MessageID::MESSAGE_APPLY_FRIEND);
@@ -117,12 +117,21 @@ void LogicSystem::RegisterCallBack()
         std::placeholders::_1,
         std::placeholders::_2,
         std::placeholders::_3);
-    LOG_INFO("[LogicSystem] Registered apply friend handler for message ID: {}", id);
+    LOG_INFO("Registered apply friend handler for message ID: {}", id);
+
+    
+    id = static_cast<size_t>(MessageID::MESSAGE_APPROVAL_FRIEND);
+	_funcCallBack[id] = std::bind(&LogicSystem::ApprovalFriendHandler, this,
+        std::placeholders::_1,
+        std::placeholders::_2,
+		std::placeholders::_3);
+	LOG_INFO("Registered approval friend handler for message ID: {}", id);
+
 }
 
 void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData)
 {
-    LOG_INFO("[LogicSystem] Processing login request...");
+    LOG_INFO("Processing login request...");
 
     json root;
     defer{
@@ -135,20 +144,20 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
 
         std::string uid = src["uid"].get<std::string>();
         std::string token = src["token"].get<std::string>();
-        LOG_INFO("[LogicSystem] Login attempt - UID: {}, Token length: {}", uid, token.length());
+        LOG_INFO("Login attempt - UID: {}, Token length: {}", uid, token.length());
 
 
         std::string tokenKey = ChatServiceConstant::USER_TOKEN_PREFIX + uid;
         auto tokenValue = RedisConPool::GetInstance().get(tokenKey).value();
 
 		if (tokenValue.empty()) {
-			LOG_ERROR("[LogicSystem] Token not found in Redis for UID: {}", uid);
+			LOG_ERROR("Token not found in Redis for UID: {}", uid);
 			root["error"] = static_cast<size_t>(ErrorCodes::UID_INVALID);
 			return;
 		}
 
 		if (tokenValue != token) {
-			LOG_ERROR("[LogicSystem] Token mismatch for UID: {}", uid);
+			LOG_ERROR("Token mismatch for UID: {}", uid);
 			root["error"] = static_cast<size_t>(ErrorCodes::TOKEN_INVALID);
 			return;
 		}
@@ -161,7 +170,7 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
         auto baseInfoExists = GetUserInfo(baseKey, uid, userInfo);
 
 		if (!baseInfoExists) {
-			LOG_ERROR("[LogicSystem] User info not found for UID: {}", uid);
+			LOG_ERROR("User info not found for UID: {}", uid);
 			root["error"] = static_cast<size_t>(ErrorCodes::UID_INVALID);
 			return;
 		}
@@ -175,6 +184,23 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
 		root["sex"] = userInfo->_sex;
         root["token"] = token;
 
+        root["apply_list"] = json::array();
+        
+		auto applyList = MySQLManager::GetInstance()->GetApplyList(uid);
+        
+        if (!applyList.empty()) {
+			for (const auto& apply : applyList) {
+				json apply_json;
+				apply_json["uid"] = apply->_uid;
+				apply_json["username"] = apply->_username;
+				apply_json["avatar"] = apply->_avatar;
+				apply_json["comments"] = apply->_comments;
+				apply_json["time"] = apply->_time;
+				apply_json["add_status"] = apply->_status;
+				root["apply_list"].push_back(apply_json);
+			}
+        }
+        
 
 		auto serverName = ConfigManager::GetInstance().getValue("SelfServer", "name");
 
@@ -196,19 +222,19 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
 
 		UserManager::GetInstance()->setUserSession(uid, session);
 
-		LOG_INFO("[LogicSystem] Login successful for UID: {}", uid);
+		LOG_INFO("Login successful for UID: {}", uid);
 
 		return;
     }
     catch (const json::parse_error& e) {
-        LOG_WARN("[LogicSystem] Failed to parse JSON in LoginHandler: {}", e.what());
+        LOG_WARN("Failed to parse JSON in LoginHandler: {}", e.what());
         root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
     }
 }
 
 void LogicSystem::SearchHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData)
 {
-    LOG_INFO("[LogicSystem] Processing search request...");
+    LOG_INFO("Processing search request...");
 
     json root;
     defer{
@@ -222,7 +248,7 @@ void LogicSystem::SearchHandler(std::shared_ptr<CSession> session, const size_t&
         std::string uid = src["uid"].get<std::string>();
         std::string selfUid = src["self"].get<std::string>();
 
-        LOG_INFO("[LogicSystem] Search attempt - UID: {}", uid);
+        LOG_INFO("Search attempt - UID: {}", uid);
 
         root["error"] = static_cast<int>(ErrorCodes::SUCCESS);
         root["users"] = json::array();
@@ -248,14 +274,14 @@ void LogicSystem::SearchHandler(std::shared_ptr<CSession> session, const size_t&
        
     }
     catch (const json::parse_error& e) {
-        LOG_WARN("[LogicSystem] Failed to parse JSON in SearchHandler: {}", e.what());
+        LOG_WARN("Failed to parse JSON in SearchHandler: {}", e.what());
         root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
     }
 }
 
 void LogicSystem::ApplyFriendHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData)
 {
-	LOG_INFO("[LogicSystem] Processing Apply Friend request...");
+	LOG_INFO("Processing Apply Friend request...");
 
 	json root;
 	defer{
@@ -270,16 +296,17 @@ void LogicSystem::ApplyFriendHandler(std::shared_ptr<CSession> session, const si
         std::string from_uid = src["self"].get<std::string>();
         std::string group_other = src["grouping"].get<std::string>();
         std::string comments = src["comments"].get<std::string>();
+        std::string remark_other = src["remark"].get<std::string>();
         auto now_time = std::chrono::system_clock::now().time_since_epoch();
 
 
-        LOG_INFO("[LogicSystem] Friend attempt - UID: {}", from_uid);
+        LOG_INFO("Friend attempt - UID: {}", from_uid);
 
         root["error"] = static_cast<int>(ErrorCodes::SUCCESS);
 
-        auto relation = FriendRelation(from_uid, to_uid, static_cast<int>(AddStatusCodes::NotConsent), group_other);
+        auto relation = FriendRelation(from_uid, to_uid, static_cast<int>(AddStatusCodes::NotConsent), group_other, remark_other);
+        auto success = MySQLManager::GetInstance()->AddFriend(relation,comments);
 
-        auto success = MySQLManager::GetInstance()->AddFriend(relation);
         if (!success) {
             return;
         }
@@ -311,6 +338,7 @@ void LogicSystem::ApplyFriendHandler(std::shared_ptr<CSession> session, const si
                 
                 if (userFind) {
                     notify["avatar"] = userInfo->_avatar;
+                    notify["username"] = userInfo->_username;
                 }
 
                 session->Send(notify.dump(4), static_cast<int>(MessageID::MESSAGE_NOTIFY_ADD_FRIEND));
@@ -325,12 +353,95 @@ void LogicSystem::ApplyFriendHandler(std::shared_ptr<CSession> session, const si
         request.set_time(std::chrono::duration_cast<std::chrono::milliseconds>(now_time).count());
         if (userFind) {
             request.set_avatar(userInfo->_avatar);
+            request.set_username(userInfo->_username);
         }
 
         FriendGrpcClient::GetInstance()->SendFriend(to_ip_value,request);
 	}
 	catch (const json::parse_error& e) {
-		LOG_WARN("[LogicSystem] Failed to parse JSON in ApplyFriendHandler: {}", e.what());
+		LOG_WARN("Failed to parse JSON in ApplyFriendHandler: {}", e.what());
+        root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
+	}
+}
+
+void LogicSystem::ApprovalFriendHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData)
+{
+	LOG_INFO("Processing Approval Friend request...");
+    json root;
+
+    defer{
+        std::string returnStr = root.dump(4);
+        session->Send(returnStr, static_cast<size_t>(MessageID::MESSAGE_APPROVAL_FRIEND_RESPONSE));
+	};
+    try {
+        auto src = json::parse(messageData);
+        std::string to_uid = src["uid"].get<std::string>();
+        std::string from_uid = src["self"].get<std::string>();
+        std::string group_other = src["grouping"].get<std::string>();
+        std::string remark_other = src["remark"].get<std::string>();
+
+        LOG_INFO("Approval Friend attempt - UID: {}", from_uid);
+
+
+		auto relation = FriendRelation(from_uid, to_uid, static_cast<int>(AddStatusCodes::MutualFriend), group_other, remark_other);
+        auto success = MySQLManager::GetInstance()->UpdateFriendStatus(relation);
+
+        if (!success) {
+            return;
+        }
+
+
+        root["error"] = static_cast<int>(ErrorCodes::SUCCESS);
+        std::string baseKey = ChatServiceConstant::USER_INFO_PREFIX + to_uid;
+        auto userInfo = std::make_shared<UserInfo>();
+        
+		auto baseInfoExists = GetUserInfo(baseKey, to_uid, userInfo);
+
+        if (!baseInfoExists) {
+			LOG_ERROR("User info not found for UID: {}", to_uid);
+            root["error"] = static_cast<int>(ErrorCodes::UID_INVALID);
+			return;
+        }
+
+		std::string ipKey = ChatServiceConstant::USER_IP_PREFIX + to_uid;
+		auto to_ip_value = RedisConPool::GetInstance().get(ipKey).value();
+
+		if (to_ip_value.empty()) {
+			return;
+		}
+
+
+        auto& cfg = ConfigManager::GetInstance();
+        auto selfServer = cfg["SelfServer"]["name"];
+
+        if (to_ip_value == selfServer) {
+            auto session = UserManager::GetInstance()->GetSession(to_uid);
+            if (session) {
+                json notify;
+                notify["uid"] = userInfo->_uid;
+                notify["username"] = userInfo->_username;
+				notify["email"] = userInfo->_email;
+				notify["birth"] = userInfo->_birth;
+                notify["avatar"] = userInfo->_avatar;
+                notify["sex"] = userInfo->_sex;
+
+                notify["grouping"] = group_other;
+				notify["remark"] = remark_other;
+                session->Send(notify.dump(4), static_cast<int>(MessageID::MESSAGE_NOTIFY_APPROVAL_FRIEND));
+            }
+            return;
+        }
+
+		message::FriendApprovalRequest request;
+		request.set_applicant(from_uid);
+		request.set_recipient(to_uid);
+        request.set_grouping(group_other);
+        request.set_remark(remark_other);
+
+		FriendGrpcClient::GetInstance()->HandleFriend(to_ip_value, request);
+    }
+    catch (const json::parse_error& e) {
+        LOG_WARN("Failed to parse JSON in ApprovalFriendHandler: {}", e.what());
         root["error"] = static_cast<int>(ErrorCodes::ERROR_JSON);
 	}
 }
@@ -345,21 +456,27 @@ bool LogicSystem::GetUserInfo(std::string baseKey, std::string uid, std::shared_
             userInfo->_uid = src["uid"].get<std::string>();
             userInfo->_username = src["username"].get<std::string>();
             userInfo->_password = src["password"].get<std::string>();
-			LOG_INFO("[LogicSystem] Retrieved user info for uid: {}", uid);
+            userInfo->_avatar = src["avatar"].get<std::string>();
+            userInfo->_birth = src["birth"].get<std::string>();
+            userInfo->_sex = src["sex"].get<std::string>();
+            userInfo->_email = src["email"].get<std::string>();
+
+			LOG_INFO("Retrieved user info for uid: {}", uid);
         }
         catch(const json::parse_error& e){
-			LOG_WARN("[LogicSystem] Failed to parse JSON in GetUserInfo: {}", e.what());
+			LOG_WARN("Failed to parse JSON in GetUserInfo: {}", e.what());
+            return false;
         }
         return true;
 	}
 	else {
-		LOG_ERROR("[LogicSystem] No user info found for uid: {}", uid);
+		LOG_ERROR("No user info found for uid: {}", uid);
 
 		std::shared_ptr<UserInfo> tmp_userInfo = nullptr;
 		tmp_userInfo = MySQLManager::GetInstance()->GetUser(uid);
 
 		if (tmp_userInfo == nullptr) {
-			LOG_ERROR("[LogicSystem] No user found in MySQL for uid: {}", uid);
+			LOG_ERROR("No user found in MySQL for uid: {}", uid);
 			return false;
 		}
 
@@ -376,7 +493,7 @@ bool LogicSystem::GetUserInfo(std::string baseKey, std::string uid, std::shared_
 
         std::string redisString = root.dump(4);
 		RedisConPool::GetInstance().set(baseKey, redisString);
-		LOG_INFO("[LogicSystem] Cached user info for uid: {}", uid);
+		LOG_INFO("Cached user info for uid: {}", uid);
 	}
 
 	return true;

@@ -9,9 +9,13 @@ message::FriendResponse FriendGrpcClient::SendFriend(const std::string server_ip
 	grpc::ClientContext context;
 	message::FriendResponse response;
 
+	auto applicant = request.applicant();
+	auto recipient = request.recipient();
+
+
 	defer{
-		response.set_applicant(request.applicant());
-		response.set_recipient(request.recipient());
+		response.set_applicant(applicant);
+		response.set_recipient(recipient);
 		response.set_error(static_cast<int>(ErrorCodes::SUCCESS));
 	};
 
@@ -23,7 +27,7 @@ message::FriendResponse FriendGrpcClient::SendFriend(const std::string server_ip
 
 	auto& pool = iter->second;
 	auto stub = pool->GetConnection();
-	LOG_INFO("Calling SendFriend from applicant: {} to recipient: {} on {}", request.applicant(), request.recipient(), server_ip);
+	LOG_INFO("Calling SendFriend from applicant: {} to recipient: {} on {}", applicant, recipient, server_ip);
 	auto status = stub->SendFriend(&context, request, &response);
 
 	if (!status.ok()) {
@@ -31,15 +35,48 @@ message::FriendResponse FriendGrpcClient::SendFriend(const std::string server_ip
 		LOG_ERROR("gRPC SendFriend Failed:{}", status.error_message());
 		return response;
 	}
-	LOG_DEBUG("gRPC FriendGrpcClient succeeded from applicant: {} to recipient: {} on {}", request.applicant(), request.recipient());
+	LOG_DEBUG("gRPC FriendGrpcClient succeeded from applicant: {} to recipient: {} on {}", applicant, recipient);
 	pool->ReturnConnection(std::move(stub));
 
 	return response;
 }
 
-message::FriendApprovalResponse FriendGrpcClient::HandleFriend(const message::FriendApprovalRequest& request)
+message::FriendApprovalResponse FriendGrpcClient::HandleFriend(const std::string server_ip, const message::FriendApprovalRequest& request)
 {
+	grpc::ClientContext context;
 	message::FriendApprovalResponse response;
+
+	auto applicant = request.applicant();
+	auto recipient = request.recipient();
+
+
+	defer{
+		response.set_applicant(applicant);
+		response.set_recipient(recipient);
+		response.set_error(static_cast<int>(ErrorCodes::SUCCESS));
+	};
+
+	auto iter = _pools.find(server_ip);
+	
+	if (iter == _pools.end()) {
+		return response;
+	}
+
+	auto& pool = iter->second;
+	auto stub = pool->GetConnection();
+	LOG_INFO("Calling HandleFriend from applicant: {} to recipient: {} on {}", applicant, recipient, server_ip);
+	auto status = stub->HandleFriend(&context, request, &response);
+
+	if (!status.ok()) {
+		response.set_error(static_cast<int>(ErrorCodes::RPC_FAILED));
+		LOG_ERROR("gRPC HandleFriend Failed:{}", status.error_message());
+		return response;
+	}
+
+	LOG_DEBUG("gRPC HandleFriend succeeded from applicant: {} to recipient: {} on {}", applicant, recipient);
+	pool->ReturnConnection(std::move(stub));
+
+
 	return response;
 }
 

@@ -32,6 +32,7 @@ private:
 	void LoginHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData);
 	void SearchHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData);
 	void ApplyFriendHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData);
+	void ApprovalFriendHandler(std::shared_ptr<CSession> session, const size_t& messageId, const std::string& messageData);
 
 	bool GetUserInfo(std::string baseKey, std::string uid, std::shared_ptr<UserInfo>& userInfo);
 	

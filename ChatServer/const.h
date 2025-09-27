@@ -42,10 +42,22 @@ enum class MessageID {
 	MESSAGE_APPLY_FRIEND_RESPONSE = 1010,
 
 	MESSAGE_NOTIFY_ADD_FRIEND = 1011,
+
+	MESSAGE_APPROVAL_FRIEND = 1013,
+	MESSAGE_APPROVAL_FRIEND_RESPONSE = 1014,
+
+	MESSAGE_NOTIFY_APPROVAL_FRIEND = 1015,
 };
 
 enum class AddStatusCodes {
 	NotFriend,
 	NotConsent,
 	MutualFriend,
+};
+
+
+enum class ApplyStatusCodes {
+	Pending,
+	Accepted,
+	Rejected,
 };

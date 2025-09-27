@@ -11,9 +11,10 @@ public:
 	bool Delete(const std::string& uid) override;
 	std::unique_ptr<FriendRelation> Search(const std::string& uid) override;
 
-
+	bool InsertApply(const FriendRelation& relation, const std::string& comments);
 	bool DeleteFriendShip(const std::string& a_uid, const std::string& b_uid);
-	std::vector<std::shared_ptr<FriendRelation>> GetUserFriends(const std::string& uid);
+	std::vector<std::shared_ptr<FriendInfo>> GetUserFriends(const std::string& uid);
+	std::vector<std::shared_ptr<FriendListInfo>> GetApplyList(const std::string& uid);
 	std::vector<std::shared_ptr<SearchInfo>> Search(const std::string& uid, const std::string& pattern);
 
 private:

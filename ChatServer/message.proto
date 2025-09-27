@@ -1,4 +1,4 @@
-syntax = "proto3";
+﻿syntax = "proto3";
 
 package message;
 
@@ -53,9 +53,10 @@ service FriendService{
 message FriendRequest{
     string applicant = 1;
     string recipient = 2;
-    string avatar = 3;
-    string message = 4;
-    int64 time = 5;
+    string username = 3;
+    string avatar = 4;
+    string message = 5;
+    int64 time = 6;
 }
 
 message FriendResponse{
@@ -65,11 +66,10 @@ message FriendResponse{
 }
 
 message FriendApprovalRequest{
-    string request_id = 1;
-    string applicant = 2;
-    string recipient = 3;
-    bool is_approved = 4;
-    int64 approved_time = 5;
+    string applicant = 1;
+    string recipient = 2;
+    string grouping = 3;
+    string remark = 4;
 }
 
 message FriendApprovalResponse{

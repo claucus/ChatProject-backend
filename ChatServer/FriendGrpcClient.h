@@ -14,7 +14,7 @@ class FriendGrpcClient:public Singleton<FriendGrpcClient>
 
 public:
 	message::FriendResponse SendFriend(const std::string server_ip, const message::FriendRequest& request);
-	message::FriendApprovalResponse HandleFriend(const message::FriendApprovalRequest& request);
+	message::FriendApprovalResponse HandleFriend(const std::string server_ip, const message::FriendApprovalRequest& request);
 
 
 private:

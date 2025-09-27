@@ -133,7 +133,8 @@ bool MySQLManager::AddFriend(FriendRelation& relation)
 		return result;
 	}
 	catch (const std::exception& e) {
+		LOG_ERROR("AddFriend Exception: {}", e.what());
 		return false;
 	}
-
 }
+

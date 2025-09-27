@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <string>
+#include "const.h"
 
 class UserInfo {
 public:
@@ -50,15 +51,12 @@ public:
 	FriendRelation() = default;
 	FriendRelation(const std::string& uid1, const std::string& uid2,
 		const int& status,
-		const std::string& group1 = "", const std::string& remark1 = "",
-		const std::string& group2 = "", const std::string remark2 = "")
+		const std::string& group = "", const std::string& remark = "")
 		: _a_uid(uid1)
 		, _b_uid(uid2)
 		, _status(status)
-		, _group_a(group1)
-		, _remark_a(remark1)
-		, _group_b(group2)
-		, _remark_b(remark2)
+		, _group(group)
+		, _remark(remark)
 	{
 
 	}
@@ -67,8 +65,48 @@ public:
 	std::string _a_uid;
 	std::string _b_uid;
 	int _status;
-	std::string _group_a;
-	std::string _remark_a;
-	std::string _group_b;
-	std::string _remark_b;
+	std::string _group;
+	std::string _remark;
+};
+
+
+class FriendListInfo {
+public:
+	FriendListInfo() = default;
+	FriendListInfo(const std::string& uid, const std::string& username,
+		const std::string& avatar, const std::string& comments,
+		const size_t& time, const int& status)
+		: _uid(uid)
+		, _username(username)
+		, _avatar(avatar)
+		, _comments(comments)
+		, _time(time)
+		, _status(status)
+	{
+	}
+
+	std::string _username;
+	std::string _uid;
+	std::string _avatar;
+	std::string _comments;
+	size_t _time;
+	int _status;
+};
+
+class FriendInfo {
+public:
+	FriendInfo() = default;
+	~FriendInfo() = default;
+	FriendInfo(const std::shared_ptr<UserInfo>& user,
+		const std::string& group = "", const std::string& remark = "")
+		: _user(user)
+		, _group(group)
+		, _remark(remark)
+	{
+	}
+
+
+	std::shared_ptr<UserInfo> _user;
+	std::string _group;
+	std::string _remark;
 };

@@ -1771,9 +1771,10 @@ class FriendRequest final : public ::google::protobuf::Message
   enum : int {
     kApplicantFieldNumber = 1,
     kRecipientFieldNumber = 2,
-    kAvatarFieldNumber = 3,
-    kMessageFieldNumber = 4,
-    kTimeFieldNumber = 5,
+    kUsernameFieldNumber = 3,
+    kAvatarFieldNumber = 4,
+    kMessageFieldNumber = 5,
+    kTimeFieldNumber = 6,
   };
   // string applicant = 1;
   void clear_applicant() ;
@@ -1807,7 +1808,23 @@ class FriendRequest final : public ::google::protobuf::Message
   std::string* _internal_mutable_recipient();
 
   public:
-  // string avatar = 3;
+  // string username = 3;
+  void clear_username() ;
+  const std::string& username() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_username(Arg_&& arg, Args_... args);
+  std::string* mutable_username();
+  PROTOBUF_NODISCARD std::string* release_username();
+  void set_allocated_username(std::string* value);
+
+  private:
+  const std::string& _internal_username() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_username(
+      const std::string& value);
+  std::string* _internal_mutable_username();
+
+  public:
+  // string avatar = 4;
   void clear_avatar() ;
   const std::string& avatar() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1823,7 +1840,7 @@ class FriendRequest final : public ::google::protobuf::Message
   std::string* _internal_mutable_avatar();
 
   public:
-  // string message = 4;
+  // string message = 5;
   void clear_message() ;
   const std::string& message() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1839,7 +1856,7 @@ class FriendRequest final : public ::google::protobuf::Message
   std::string* _internal_mutable_message();
 
   public:
-  // int64 time = 5;
+  // int64 time = 6;
   void clear_time() ;
   ::int64_t time() const;
   void set_time(::int64_t value);
@@ -1854,8 +1871,8 @@ class FriendRequest final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      3, 5, 0,
-      61, 2>
+      3, 6, 0,
+      69, 2>
       _table_;
 
   friend class ::google::protobuf::MessageLite;
@@ -1874,6 +1891,7 @@ class FriendRequest final : public ::google::protobuf::Message
                           const FriendRequest& from_msg);
     ::google::protobuf::internal::ArenaStringPtr applicant_;
     ::google::protobuf::internal::ArenaStringPtr recipient_;
+    ::google::protobuf::internal::ArenaStringPtr username_;
     ::google::protobuf::internal::ArenaStringPtr avatar_;
     ::google::protobuf::internal::ArenaStringPtr message_;
     ::int64_t time_;
@@ -2257,29 +2275,12 @@ class FriendApprovalRequest final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kRequestIdFieldNumber = 1,
-    kApplicantFieldNumber = 2,
-    kRecipientFieldNumber = 3,
-    kApprovedTimeFieldNumber = 5,
-    kIsApprovedFieldNumber = 4,
+    kApplicantFieldNumber = 1,
+    kRecipientFieldNumber = 2,
+    kGroupingFieldNumber = 3,
+    kRemarkFieldNumber = 4,
   };
-  // string request_id = 1;
-  void clear_request_id() ;
-  const std::string& request_id() const;
-  template <typename Arg_ = const std::string&, typename... Args_>
-  void set_request_id(Arg_&& arg, Args_... args);
-  std::string* mutable_request_id();
-  PROTOBUF_NODISCARD std::string* release_request_id();
-  void set_allocated_request_id(std::string* value);
-
-  private:
-  const std::string& _internal_request_id() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_request_id(
-      const std::string& value);
-  std::string* _internal_mutable_request_id();
-
-  public:
-  // string applicant = 2;
+  // string applicant = 1;
   void clear_applicant() ;
   const std::string& applicant() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -2295,7 +2296,7 @@ class FriendApprovalRequest final : public ::google::protobuf::Message
   std::string* _internal_mutable_applicant();
 
   public:
-  // string recipient = 3;
+  // string recipient = 2;
   void clear_recipient() ;
   const std::string& recipient() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -2311,24 +2312,36 @@ class FriendApprovalRequest final : public ::google::protobuf::Message
   std::string* _internal_mutable_recipient();
 
   public:
-  // int64 approved_time = 5;
-  void clear_approved_time() ;
-  ::int64_t approved_time() const;
-  void set_approved_time(::int64_t value);
+  // string grouping = 3;
+  void clear_grouping() ;
+  const std::string& grouping() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_grouping(Arg_&& arg, Args_... args);
+  std::string* mutable_grouping();
+  PROTOBUF_NODISCARD std::string* release_grouping();
+  void set_allocated_grouping(std::string* value);
 
   private:
-  ::int64_t _internal_approved_time() const;
-  void _internal_set_approved_time(::int64_t value);
+  const std::string& _internal_grouping() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_grouping(
+      const std::string& value);
+  std::string* _internal_mutable_grouping();
 
   public:
-  // bool is_approved = 4;
-  void clear_is_approved() ;
-  bool is_approved() const;
-  void set_is_approved(bool value);
+  // string remark = 4;
+  void clear_remark() ;
+  const std::string& remark() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_remark(Arg_&& arg, Args_... args);
+  std::string* mutable_remark();
+  PROTOBUF_NODISCARD std::string* release_remark();
+  void set_allocated_remark(std::string* value);
 
   private:
-  bool _internal_is_approved() const;
-  void _internal_set_is_approved(bool value);
+  const std::string& _internal_remark() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_remark(
+      const std::string& value);
+  std::string* _internal_mutable_remark();
 
   public:
   // @@protoc_insertion_point(class_scope:message.FriendApprovalRequest)
@@ -2336,8 +2349,8 @@ class FriendApprovalRequest final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      3, 5, 0,
-      66, 2>
+      2, 4, 0,
+      70, 2>
       _table_;
 
   friend class ::google::protobuf::MessageLite;
@@ -2354,11 +2367,10 @@ class FriendApprovalRequest final : public ::google::protobuf::Message
     inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const FriendApprovalRequest& from_msg);
-    ::google::protobuf::internal::ArenaStringPtr request_id_;
     ::google::protobuf::internal::ArenaStringPtr applicant_;
     ::google::protobuf::internal::ArenaStringPtr recipient_;
-    ::int64_t approved_time_;
-    bool is_approved_;
+    ::google::protobuf::internal::ArenaStringPtr grouping_;
+    ::google::protobuf::internal::ArenaStringPtr remark_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -3096,7 +3108,55 @@ inline void FriendRequest::set_allocated_recipient(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:message.FriendRequest.recipient)
 }
 
-// string avatar = 3;
+// string username = 3;
+inline void FriendRequest::clear_username() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.username_.ClearToEmpty();
+}
+inline const std::string& FriendRequest::username() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:message.FriendRequest.username)
+  return _internal_username();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void FriendRequest::set_username(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.username_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:message.FriendRequest.username)
+}
+inline std::string* FriendRequest::mutable_username() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_username();
+  // @@protoc_insertion_point(field_mutable:message.FriendRequest.username)
+  return _s;
+}
+inline const std::string& FriendRequest::_internal_username() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.username_.Get();
+}
+inline void FriendRequest::_internal_set_username(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.username_.Set(value, GetArena());
+}
+inline std::string* FriendRequest::_internal_mutable_username() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.username_.Mutable( GetArena());
+}
+inline std::string* FriendRequest::release_username() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:message.FriendRequest.username)
+  return _impl_.username_.Release();
+}
+inline void FriendRequest::set_allocated_username(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.username_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.username_.IsDefault()) {
+    _impl_.username_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:message.FriendRequest.username)
+}
+
+// string avatar = 4;
 inline void FriendRequest::clear_avatar() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.avatar_.ClearToEmpty();
@@ -3144,7 +3204,7 @@ inline void FriendRequest::set_allocated_avatar(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:message.FriendRequest.avatar)
 }
 
-// string message = 4;
+// string message = 5;
 inline void FriendRequest::clear_message() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.message_.ClearToEmpty();
@@ -3192,7 +3252,7 @@ inline void FriendRequest::set_allocated_message(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:message.FriendRequest.message)
 }
 
-// int64 time = 5;
+// int64 time = 6;
 inline void FriendRequest::clear_time() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.time_ = ::int64_t{0};
@@ -3340,55 +3400,7 @@ inline void FriendResponse::set_allocated_recipient(std::string* value) {
 
 // FriendApprovalRequest
 
-// string request_id = 1;
-inline void FriendApprovalRequest::clear_request_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.request_id_.ClearToEmpty();
-}
-inline const std::string& FriendApprovalRequest::request_id() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:message.FriendApprovalRequest.request_id)
-  return _internal_request_id();
-}
-template <typename Arg_, typename... Args_>
-inline PROTOBUF_ALWAYS_INLINE void FriendApprovalRequest::set_request_id(Arg_&& arg,
-                                                     Args_... args) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.request_id_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:message.FriendApprovalRequest.request_id)
-}
-inline std::string* FriendApprovalRequest::mutable_request_id() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  std::string* _s = _internal_mutable_request_id();
-  // @@protoc_insertion_point(field_mutable:message.FriendApprovalRequest.request_id)
-  return _s;
-}
-inline const std::string& FriendApprovalRequest::_internal_request_id() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.request_id_.Get();
-}
-inline void FriendApprovalRequest::_internal_set_request_id(const std::string& value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.request_id_.Set(value, GetArena());
-}
-inline std::string* FriendApprovalRequest::_internal_mutable_request_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.request_id_.Mutable( GetArena());
-}
-inline std::string* FriendApprovalRequest::release_request_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:message.FriendApprovalRequest.request_id)
-  return _impl_.request_id_.Release();
-}
-inline void FriendApprovalRequest::set_allocated_request_id(std::string* value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.request_id_.SetAllocated(value, GetArena());
-  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.request_id_.IsDefault()) {
-    _impl_.request_id_.Set("", GetArena());
-  }
-  // @@protoc_insertion_point(field_set_allocated:message.FriendApprovalRequest.request_id)
-}
-
-// string applicant = 2;
+// string applicant = 1;
 inline void FriendApprovalRequest::clear_applicant() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.applicant_.ClearToEmpty();
@@ -3436,7 +3448,7 @@ inline void FriendApprovalRequest::set_allocated_applicant(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:message.FriendApprovalRequest.applicant)
 }
 
-// string recipient = 3;
+// string recipient = 2;
 inline void FriendApprovalRequest::clear_recipient() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.recipient_.ClearToEmpty();
@@ -3484,48 +3496,100 @@ inline void FriendApprovalRequest::set_allocated_recipient(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:message.FriendApprovalRequest.recipient)
 }
 
-// bool is_approved = 4;
-inline void FriendApprovalRequest::clear_is_approved() {
+// string grouping = 3;
+inline void FriendApprovalRequest::clear_grouping() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.is_approved_ = false;
+  _impl_.grouping_.ClearToEmpty();
 }
-inline bool FriendApprovalRequest::is_approved() const {
-  // @@protoc_insertion_point(field_get:message.FriendApprovalRequest.is_approved)
-  return _internal_is_approved();
+inline const std::string& FriendApprovalRequest::grouping() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:message.FriendApprovalRequest.grouping)
+  return _internal_grouping();
 }
-inline void FriendApprovalRequest::set_is_approved(bool value) {
-  _internal_set_is_approved(value);
-  // @@protoc_insertion_point(field_set:message.FriendApprovalRequest.is_approved)
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void FriendApprovalRequest::set_grouping(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.grouping_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:message.FriendApprovalRequest.grouping)
 }
-inline bool FriendApprovalRequest::_internal_is_approved() const {
+inline std::string* FriendApprovalRequest::mutable_grouping() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_grouping();
+  // @@protoc_insertion_point(field_mutable:message.FriendApprovalRequest.grouping)
+  return _s;
+}
+inline const std::string& FriendApprovalRequest::_internal_grouping() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.is_approved_;
+  return _impl_.grouping_.Get();
 }
-inline void FriendApprovalRequest::_internal_set_is_approved(bool value) {
+inline void FriendApprovalRequest::_internal_set_grouping(const std::string& value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.is_approved_ = value;
+  _impl_.grouping_.Set(value, GetArena());
+}
+inline std::string* FriendApprovalRequest::_internal_mutable_grouping() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.grouping_.Mutable( GetArena());
+}
+inline std::string* FriendApprovalRequest::release_grouping() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:message.FriendApprovalRequest.grouping)
+  return _impl_.grouping_.Release();
+}
+inline void FriendApprovalRequest::set_allocated_grouping(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.grouping_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.grouping_.IsDefault()) {
+    _impl_.grouping_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:message.FriendApprovalRequest.grouping)
 }
 
-// int64 approved_time = 5;
-inline void FriendApprovalRequest::clear_approved_time() {
+// string remark = 4;
+inline void FriendApprovalRequest::clear_remark() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.approved_time_ = ::int64_t{0};
+  _impl_.remark_.ClearToEmpty();
 }
-inline ::int64_t FriendApprovalRequest::approved_time() const {
-  // @@protoc_insertion_point(field_get:message.FriendApprovalRequest.approved_time)
-  return _internal_approved_time();
+inline const std::string& FriendApprovalRequest::remark() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:message.FriendApprovalRequest.remark)
+  return _internal_remark();
 }
-inline void FriendApprovalRequest::set_approved_time(::int64_t value) {
-  _internal_set_approved_time(value);
-  // @@protoc_insertion_point(field_set:message.FriendApprovalRequest.approved_time)
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void FriendApprovalRequest::set_remark(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.remark_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:message.FriendApprovalRequest.remark)
 }
-inline ::int64_t FriendApprovalRequest::_internal_approved_time() const {
+inline std::string* FriendApprovalRequest::mutable_remark() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_remark();
+  // @@protoc_insertion_point(field_mutable:message.FriendApprovalRequest.remark)
+  return _s;
+}
+inline const std::string& FriendApprovalRequest::_internal_remark() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.approved_time_;
+  return _impl_.remark_.Get();
 }
-inline void FriendApprovalRequest::_internal_set_approved_time(::int64_t value) {
+inline void FriendApprovalRequest::_internal_set_remark(const std::string& value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.approved_time_ = value;
+  _impl_.remark_.Set(value, GetArena());
+}
+inline std::string* FriendApprovalRequest::_internal_mutable_remark() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.remark_.Mutable( GetArena());
+}
+inline std::string* FriendApprovalRequest::release_remark() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:message.FriendApprovalRequest.remark)
+  return _impl_.remark_.Release();
+}
+inline void FriendApprovalRequest::set_allocated_remark(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.remark_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.remark_.IsDefault()) {
+    _impl_.remark_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:message.FriendApprovalRequest.remark)
 }
 
 // -------------------------------------------------------------------
