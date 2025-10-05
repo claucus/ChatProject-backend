@@ -187,20 +187,44 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
         root["apply_list"] = json::array();
         
 		auto applyList = MySQLManager::GetInstance()->GetApplyList(uid);
-        
         if (!applyList.empty()) {
 			for (const auto& apply : applyList) {
 				json apply_json;
 				apply_json["uid"] = apply->_uid;
 				apply_json["username"] = apply->_username;
+
 				apply_json["avatar"] = apply->_avatar;
+
 				apply_json["comments"] = apply->_comments;
 				apply_json["time"] = apply->_time;
+
 				apply_json["add_status"] = apply->_status;
+
 				root["apply_list"].push_back(apply_json);
 			}
         }
-        
+
+        root["contact_list"] = json::array();
+
+        auto contactList = MySQLManager::GetInstance()->GetFriendList(uid);
+        if (!contactList.empty()) {
+            for (const auto& contact : contactList) {
+                json contact_json;
+                contact_json["uid"] = contact->_user->_uid;
+                contact_json["username"] = contact->_user->_username;
+
+                contact_json["avatar"] = contact->_user->_avatar;
+				contact_json["email"] = contact->_user->_email;
+
+				contact_json["birth"] = contact->_user->_birth;
+                contact_json["sex"] = contact->_user->_sex;
+
+				contact_json["group"] = contact->_group;
+                contact_json["remark"] = contact->_remark;
+
+				root["contact_list"].push_back(contact_json);
+            }
+        }
 
 		auto serverName = ConfigManager::GetInstance().getValue("SelfServer", "name");
 
@@ -302,8 +326,8 @@ void LogicSystem::ApplyFriendHandler(std::shared_ptr<CSession> session, const si
 
         LOG_INFO("Friend attempt - UID: {}", from_uid);
 
+        root["uid"] = to_uid;
         root["error"] = static_cast<int>(ErrorCodes::SUCCESS);
-
         auto relation = FriendRelation(from_uid, to_uid, static_cast<int>(AddStatusCodes::NotConsent), group_other, remark_other);
         auto success = MySQLManager::GetInstance()->AddFriend(relation,comments);
 
@@ -403,6 +427,16 @@ void LogicSystem::ApprovalFriendHandler(std::shared_ptr<CSession> session, const
 			return;
         }
 
+        root["uid"] = to_uid;
+		root["username"] = userInfo->_username;
+        root["email"] = userInfo->_email;
+		root["birth"] = userInfo->_birth;
+        root["avatar"] = userInfo->_avatar;
+        root["sex"] = userInfo->_sex;
+		root["grouping"] = group_other;
+		root["remark"] = remark_other;
+
+
 		std::string ipKey = ChatServiceConstant::USER_IP_PREFIX + to_uid;
 		auto to_ip_value = RedisConPool::GetInstance().get(ipKey).value();
 
@@ -410,7 +444,7 @@ void LogicSystem::ApprovalFriendHandler(std::shared_ptr<CSession> session, const
 			return;
 		}
 
-
+        
         auto& cfg = ConfigManager::GetInstance();
         auto selfServer = cfg["SelfServer"]["name"];
 

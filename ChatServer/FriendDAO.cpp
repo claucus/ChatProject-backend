@@ -148,16 +148,16 @@ std::vector<std::shared_ptr<FriendInfo>> FriendDAO::GetUserFriends(const std::st
 			for (auto row : result.fetchAll()) {
 				auto relationship = std::make_shared<FriendInfo>(
 					std::make_shared<UserInfo>(
-						row[0].get<std::string>(),
-						row[1].get<std::string>(),
-						row[2].get<std::string>(),
-						row[3].get<std::string>(),
-						row[4].get<std::string>(),
-						row[5].get<std::string>(),
-						row[6].get<std::string>()
+						row[0].get<std::string>(), // uid
+						row[1].get<std::string>(), // email
+						row[2].get<std::string>(), // username
+						row[3].get<std::string>(), // password
+						row[4].get<std::string>(), // birth
+						row[5].get<std::string>(), // avatar
+						row[6].get<std::string>() // sex
 					),
-					row[7].isNull() ? "" : row[7].get<std::string>(),
-					row[8].isNull() ? "" : row[8].get<std::string>()
+					row[7].isNull() ? "" : row[7].get<std::string>(), // group
+					row[8].isNull() ? "" : row[8].get<std::string>() // remark
 				);
 
 				friends.emplace_back(std::move(relationship));

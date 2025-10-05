@@ -154,3 +154,8 @@ std::vector<std::shared_ptr<FriendListInfo>> MySQLManager::GetApplyList(const st
 {
 	return _friendDAO.GetApplyList(uid);
 }
+
+std::vector<std::shared_ptr<FriendInfo>> MySQLManager::GetFriendList(const std::string& uid)
+{
+    return _friendDAO.GetUserFriends(uid);
+}

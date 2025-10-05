@@ -19,6 +19,7 @@ public:
 	bool UpdateFriendStatus(FriendRelation& relation);
 
 	std::vector<std::shared_ptr<FriendListInfo>> GetApplyList(const std::string& uid);
+	std::vector<std::shared_ptr<FriendInfo>> GetFriendList(const std::string& uid);
 private:
 	MySQLManager() = default;
 

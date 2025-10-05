@@ -12,6 +12,7 @@ message::FriendResponse FriendGrpcClient::SendFriend(const std::string server_ip
 	auto applicant = request.applicant();
 	auto recipient = request.recipient();
 
+	LOG_INFO("applicant: {} ,and recipient: {}", applicant, recipient);
 
 	defer{
 		response.set_applicant(applicant);
@@ -49,6 +50,7 @@ message::FriendApprovalResponse FriendGrpcClient::HandleFriend(const std::string
 	auto applicant = request.applicant();
 	auto recipient = request.recipient();
 
+	LOG_INFO("applicant: {} ,and recipient: {}", applicant, recipient);
 
 	defer{
 		response.set_applicant(applicant);
