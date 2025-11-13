@@ -3,7 +3,7 @@
 
 class ReceiveNode :public BaseNode {
 public:
-	ReceiveNode(size_t maxLength, size_t messageId);
+	ReceiveNode(size_t messageId, size_t maxLength);
 	size_t GetId() const;
 
 private:

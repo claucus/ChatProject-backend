@@ -18,10 +18,10 @@ SendNode::SendNode(const char* message, size_t maxLength, size_t messageId):
 	BaseNode(maxLength + HEADER_TOTAL_LENGTH),
 	_messageId(messageId)
 {
-	size_t messageIdHost = boost::asio::detail::socket_ops::host_to_network_short(messageId);
+	size_t messageIdHost = boost::asio::detail::socket_ops::host_to_network_short(static_cast<uint16_t>(messageId));
 	memcpy(_data, &messageIdHost, HEADER_ID_LENGTH);
 
-	size_t maxLengthHost = boost::asio::detail::socket_ops::host_to_network_short(maxLength);
+	size_t maxLengthHost = boost::asio::detail::socket_ops::host_to_network_short(static_cast<uint16_t>(maxLength));
 	memcpy(_data + HEADER_ID_LENGTH, &maxLengthHost, HEADER_DATA_LENGTH);
 
 	memcpy(_data + HEADER_TOTAL_LENGTH, message, maxLength);

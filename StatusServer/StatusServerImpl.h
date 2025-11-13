@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <grpcpp/grpcpp.h>
 #include "message.grpc.pb.h"
 #include <unordered_map>
@@ -43,9 +43,9 @@ public:
 		message::LoginResponse * response) override;
 
 private:
-	void insertToken(std::string uuid,std::string token);
 	ChatServer GetChatServer();
-
+	void saveSessionToRedis(const std::string& uid, const std::string& serverName, const std::string& token);
+	std::optional<std::tuple<std::string, std::string, std::string>> getSessionFromRedis(const std::string& uid);
 private:
 	std::unordered_map <std::string, ChatServer> _servers;
 	std::mutex _serverMutex;

@@ -1,4 +1,4 @@
-﻿#include "LogicSystem.h"
+#include "LogicSystem.h"
 #include "StatusGrpcClient.h"
 #include "MySQLManager.h"
 #include "RedisConPool.h"
@@ -137,6 +137,7 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
     defer{
 		std::string returnStr = root.dump(4);
 		session->Send(returnStr, static_cast<size_t>(MessageID::MESSAGE_CHAT_LOGIN_RESPONSE));
+        LOG_INFO("Send json is {}", returnStr);
     };
 
     try {
@@ -146,9 +147,11 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
         std::string token = src["token"].get<std::string>();
         LOG_INFO("Login attempt - UID: {}, Token length: {}", uid, token.length());
 
+        std::string sessionOpt = RedisConPool::GetInstance().get(ChatServiceConstant::USER_SESSION_PREFIX + uid).value();
+        auto ttlTime = RedisConPool::GetInstance().ttl(ChatServiceConstant::USER_SESSION_PREFIX + uid);
+        auto sessionJson = json::parse(sessionOpt);
 
-        std::string tokenKey = ChatServiceConstant::USER_TOKEN_PREFIX + uid;
-        auto tokenValue = RedisConPool::GetInstance().get(tokenKey).value();
+        std::string tokenValue = sessionJson["token"].get<std::string>();
 
 		if (tokenValue.empty()) {
 			LOG_ERROR("Token not found in Redis for UID: {}", uid);
@@ -204,7 +207,7 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
 			}
         }
 
-        root["contact_list"] = json::array();
+        root["contact_friend_list"] = json::array();
 
         auto contactList = MySQLManager::GetInstance()->GetFriendList(uid);
         if (!contactList.empty()) {
@@ -222,27 +225,39 @@ void LogicSystem::LoginHandler(std::shared_ptr<CSession> session, const size_t& 
 				contact_json["group"] = contact->_group;
                 contact_json["remark"] = contact->_remark;
 
-				root["contact_list"].push_back(contact_json);
+				root["contact_friend_list"].push_back(contact_json);
             }
         }
 
 		auto serverName = ConfigManager::GetInstance().getValue("SelfServer", "name");
+        auto loginTimes = sessionJson["times"].get<std::string>();
 
-		auto redisResult = RedisConPool::GetInstance().hget(ChatServiceConstant::LOGIN_COUNT, serverName).value();
-		int loginCount = 0;
+        if (std::stoi(loginTimes) == 0) {
+            sessionJson["times"] = "1";
 
-		if (!redisResult.empty()) {
-			loginCount = std::stoi(redisResult);
-		}
+            auto redisResult = RedisConPool::GetInstance().hget(ChatServiceConstant::LOGIN_COUNT, serverName).value();
+			int loginCount = 0;
 
-		loginCount++;
+			if (!redisResult.empty()) {
+				loginCount = std::stoi(redisResult);
+			}
 
-		RedisConPool::GetInstance().hset(ChatServiceConstant::LOGIN_COUNT, serverName, std::to_string(loginCount));
+			loginCount++;
+            RedisConPool::GetInstance().hset(ChatServiceConstant::LOGIN_COUNT, serverName, std::to_string(loginCount));
+        }
+        else {
+            sessionJson["times"] = std::to_string(std::stoi(loginTimes) + 1);
 
-		session->SetUid(uid);
+        }
+        RedisConPool::GetInstance().setex(ChatServiceConstant::USER_SESSION_PREFIX + uid, ttlTime, sessionJson.dump());
 
-		std::string ipKey = ChatServiceConstant::USER_IP_PREFIX + uid;
-		RedisConPool::GetInstance().set(ipKey, serverName);
+		session->SetUserUid(uid);
+
+        std::string apply_list = ChatServiceConstant::FRIEND_REQUEST_PREFIX + uid + "_apply";
+		std::string contact_list = ChatServiceConstant::FRIEND_REQUEST_PREFIX + uid + "_contact";
+
+        RedisConPool::GetInstance().set(apply_list, root["apply_list"].dump(4));
+		RedisConPool::GetInstance().set(contact_list, root["contact_friend_list"].dump(4));
 
 		UserManager::GetInstance()->setUserSession(uid, session);
 
@@ -264,6 +279,7 @@ void LogicSystem::SearchHandler(std::shared_ptr<CSession> session, const size_t&
     defer{
         std::string returnStr = root.dump(4);
         session->Send(returnStr, static_cast<size_t>(MessageID::MESSAGE_GET_SEARCH_USER_RESPONSE));
+        LOG_INFO("Send json is {}", returnStr);
     };
 
     try {
@@ -311,10 +327,12 @@ void LogicSystem::ApplyFriendHandler(std::shared_ptr<CSession> session, const si
 	defer{
 		std::string returnStr = root.dump(4);
 		session->Send(returnStr, static_cast<size_t>(MessageID::MESSAGE_APPLY_FRIEND_RESPONSE));
+        LOG_INFO("Send json is {}", returnStr);
 	};
 
     try {
         auto src = json::parse(messageData);
+        LOG_INFO("parse json is {}", messageData);
 
         std::string to_uid = src["uid"].get<std::string>();
         std::string from_uid = src["self"].get<std::string>();
@@ -325,7 +343,7 @@ void LogicSystem::ApplyFriendHandler(std::shared_ptr<CSession> session, const si
 
 
         LOG_INFO("Friend attempt - UID: {}", from_uid);
-
+        
         root["uid"] = to_uid;
         root["error"] = static_cast<int>(ErrorCodes::SUCCESS);
         auto relation = FriendRelation(from_uid, to_uid, static_cast<int>(AddStatusCodes::NotConsent), group_other, remark_other);
@@ -335,9 +353,11 @@ void LogicSystem::ApplyFriendHandler(std::shared_ptr<CSession> session, const si
             return;
         }
 
+        std::string sessionOpt = RedisConPool::GetInstance().get(ChatServiceConstant::USER_SESSION_PREFIX + to_uid).value();
+        auto sessionJson = json::parse(sessionOpt);
 
-        std::string ipKey = ChatServiceConstant::USER_IP_PREFIX + to_uid;
-        auto to_ip_value = RedisConPool::GetInstance().get(ipKey).value();
+        auto to_ip_value = sessionJson["server_name"].get<std::string>();
+
         if (to_ip_value.empty()) {
             return;
         }
@@ -396,9 +416,12 @@ void LogicSystem::ApprovalFriendHandler(std::shared_ptr<CSession> session, const
     defer{
         std::string returnStr = root.dump(4);
         session->Send(returnStr, static_cast<size_t>(MessageID::MESSAGE_APPROVAL_FRIEND_RESPONSE));
+        LOG_INFO("Send json is {}", returnStr);
 	};
     try {
         auto src = json::parse(messageData);
+        LOG_INFO("parse json is {}", messageData);
+
         std::string to_uid = src["uid"].get<std::string>();
         std::string from_uid = src["self"].get<std::string>();
         std::string group_other = src["grouping"].get<std::string>();
@@ -437,8 +460,10 @@ void LogicSystem::ApprovalFriendHandler(std::shared_ptr<CSession> session, const
 		root["remark"] = remark_other;
 
 
-		std::string ipKey = ChatServiceConstant::USER_IP_PREFIX + to_uid;
-		auto to_ip_value = RedisConPool::GetInstance().get(ipKey).value();
+		auto sessionOpt = RedisConPool::GetInstance().get(ChatServiceConstant::USER_SESSION_PREFIX + to_uid).value();
+		auto sessionJson = json::parse(sessionOpt);
+
+		auto to_ip_value = sessionJson["server_name"].get<std::string>();
 
 		if (to_ip_value.empty()) {
 			return;

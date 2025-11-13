@@ -9,7 +9,7 @@
 class CServer
 {
 public:
-	CServer(boost::asio::io_context& ioc, short port);
+	CServer(boost::asio::io_context& ioc, size_t port);
 	~CServer();
 	void clearSession(std::string session);
 
@@ -17,7 +17,7 @@ private:
 	boost::asio::io_context& _ioc;
 	boost::asio::ip::tcp::acceptor _acceptor;
 	std::mutex _mutex;
-	short _port;
+	size_t _port;
 
 	std::map<std::string, std::shared_ptr<CSession>> _sessions;
 

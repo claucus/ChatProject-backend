@@ -1,8 +1,8 @@
-﻿#include "CServer.h"
+#include "CServer.h"
 #include "UserManager.h"
 #include "Logger.h"
 
-CServer::CServer(boost::asio::io_context& ioc, short port):
+CServer::CServer(boost::asio::io_context& ioc, size_t port):
 	_ioc(ioc),
 	_port(port),
 	_acceptor(ioc,boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(),port))
@@ -19,7 +19,7 @@ CServer::~CServer()
 void CServer::clearSession(std::string session)
 {
 	if (_sessions.find(session) != _sessions.end()) {
-		UserManager::GetInstance()->removeUserSession(_sessions[session]->GetUid());
+		UserManager::GetInstance()->removeUserSession(_sessions[session]->GetSessionUid());
 
 		{
 			std::lock_guard<std::mutex> lock(_mutex);
@@ -39,9 +39,9 @@ void CServer::handlerAccept(std::shared_ptr<CSession> newSession, const boost::s
 		newSession->Start();
 		{
 			std::lock_guard<std::mutex> lock(_mutex);
-			_sessions.insert(std::make_pair(newSession->GetUid(), newSession));
+			_sessions.insert(std::make_pair(newSession->GetSessionUid(), newSession));
 			LOG_INFO("New session accepted - UUID: {}, Total sessions: {}", 
-						newSession->GetUid(), _sessions.size());
+						newSession->GetSessionUid(), _sessions.size());
 		}
 	}
 	else {

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "LogicNode.h"
 #include "Singleton.h"

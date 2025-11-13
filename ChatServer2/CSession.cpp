@@ -1,4 +1,4 @@
-﻿#include "CSession.h"
+#include "CSession.h"
 #include "CServer.h"
 #include "LogicNode.h"
 #include <boost/uuid/uuid_io.hpp>
@@ -13,16 +13,16 @@ CSession::CSession(boost::asio::io_context& ioc, CServer* server) :
 	_b_head_parse(true)
 {
 	auto a_uuid = boost::uuids::random_generator()();
-	_uid = boost::uuids::to_string(a_uuid);
-	LOG_INFO("Session: {}, Created new session", _uid);
+	_sessionUid = boost::uuids::to_string(a_uuid);
+	LOG_INFO("Session: {}, Created new session", _sessionUid);
 
-	_receiveHeadNode = std::make_shared<ReceiveNode>(HEADER_TOTAL_LENGTH, 0);
+	_receiveHeadNode = std::make_shared<ReceiveNode>(0, HEADER_TOTAL_LENGTH);
 	_receiveMessageNode = nullptr;
 }
 
 CSession::~CSession()
 {
-	LOG_INFO("Session: {}, Destroying session", _uid);
+	LOG_INFO("Session: {}, Destroying session", _sessionUid);
 	Close();
 }
 
@@ -31,19 +31,24 @@ boost::asio::ip::tcp::socket& CSession::GetSocket()
 	return _socket;
 }
 
-std::string& CSession::GetUid()
+std::string& CSession::GetSessionUid()
 {
-	return _uid;
+	return _sessionUid;
 }
 
-void CSession::SetUid(const std::string& uid)
+void CSession::SetUserUid(const std::string& uid)
 {
-	_uid = uid;
+	_userUid = uid;
+}
+
+std::string CSession::GetUserUid() const
+{
+	return _userUid;
 }
 
 void CSession::Start()
 {
-	LOG_INFO("Session: {}, Starting session", _uid);
+	LOG_INFO("Session: {}, Starting session", _sessionUid);
 	auto self = Shared();
 	_socket.async_read_some(
 		boost::asio::buffer(_buffer, BUFFER_SIZE),
@@ -54,12 +59,12 @@ void CSession::Start()
 void CSession::Close()
 {
 	if (!_b_close) {
-		LOG_INFO("Session: {}, Closing session", _uid);
+		LOG_INFO("Session: {}, Closing session", _sessionUid);
 		_b_close = true;
 		boost::system::error_code ec;
 		_socket.close(ec);
 		if (_server) {
-			_server->clearSession(_uid);
+			_server->clearSession(_sessionUid);
 		}
 	}
 }
@@ -73,7 +78,7 @@ void CSession::Send(char* message, size_t maxLength, size_t messageId)
 	}
 	
 	LOG_DEBUG("Session: {}, Queued message for sending, ID: {}, Length: {}", 
-				  _uid, messageId, maxLength);
+		_sessionUid, messageId, maxLength);
 	
 	auto self = Shared();
 	handleWrite(boost::system::error_code(), self);
@@ -92,12 +97,12 @@ std::shared_ptr<CSession> CSession::Shared()
 void CSession::handleRead(const boost::system::error_code& error, size_t bytesTransferred, std::shared_ptr<CSession> self)
 {
 	if (error) {
-		LOG_ERROR("Session: {}, Read error: {}", _uid, error.message());
+		LOG_ERROR("Session: {}, Read error: {}", _sessionUid, error.message());
 		Close();
 		return;
 	}
 
-	LOG_INFO("Session: {}, Received {} bytes", _uid, bytesTransferred);
+	LOG_INFO("Session: {}, Received {} bytes", _sessionUid, bytesTransferred);
 
 	size_t proceessBytes = 0;
 	while (proceessBytes < bytesTransferred) {
@@ -115,18 +120,18 @@ void CSession::handleRead(const boost::system::error_code& error, size_t bytesTr
 			proceessBytes += bytesToCopy;
 
 			if (_receiveHeadNode->_currentLength == HEADER_TOTAL_LENGTH) {
-				uint16_t messageId = *reinterpret_cast<uint16_t*>(_receiveHeadNode->_data);
-				uint16_t messageLength = *reinterpret_cast<uint16_t*>(_receiveHeadNode->_data + HEADER_ID_LENGTH);
+				size_t messageId = *reinterpret_cast<size_t*>(_receiveHeadNode->_data);
+				size_t messageLength = *reinterpret_cast<size_t*>(_receiveHeadNode->_data + HEADER_ID_LENGTH);
 
 				messageId = boost::asio::detail::socket_ops::network_to_host_short(messageId);
 				messageLength = boost::asio::detail::socket_ops::network_to_host_short(messageLength);
 
 				LOG_DEBUG("Session: {}, Header parsed - Message ID: {}, Length: {}", 
-							_uid, messageId, messageLength);
+					_sessionUid, messageId, messageLength);
 
 				if (messageLength > MAX_LENGTH) {
 					LOG_ERROR("Session: {}, Message length {} exceeds maximum allowed {}", 
-								_uid, messageLength, MAX_LENGTH);
+						_sessionUid, messageLength, MAX_LENGTH);
 					Close();
 					return;
 				}
@@ -149,7 +154,7 @@ void CSession::handleRead(const boost::system::error_code& error, size_t bytesTr
 			proceessBytes += bytesToCopy;
 
 			if (_receiveMessageNode->_currentLength == _receiveMessageNode->_totalLength) {
-				LOG_DEBUG("Session: {}, Message fully received, posting to LogicSystem", _uid);
+				LOG_DEBUG("Session: {}, Message fully received, posting to LogicSystem", _sessionUid);
 				
 				auto logicNode = std::make_shared<LogicNode>(self, _receiveMessageNode);
 				LogicSystem::GetInstance()->PostMessageToQueue(logicNode);
@@ -169,7 +174,7 @@ void CSession::handleRead(const boost::system::error_code& error, size_t bytesTr
 void CSession::handleWrite(const boost::system::error_code& error, std::shared_ptr<CSession> self)
 {
 	if (error) {
-		LOG_ERROR("Session: {}, Write error: {}", _uid, error.message());
+		LOG_ERROR("Session: {}, Write error: {}", _sessionUid, error.message());
 		Close();
 		return;
 	}
@@ -185,8 +190,8 @@ void CSession::handleWrite(const boost::system::error_code& error, std::shared_p
 		_sendQueue.pop();
 	}
 
-	LOG_DEBUG("Session: {}, Sending message, ID: {}, Length: {}", 
-				  _uid, node->GetId(), node->_totalLength);
+	LOG_DEBUG("Session: {}, Sending message, ID: {}, Length: {}",
+		_sessionUid, node->GetId(), node->_totalLength);
 
 	boost::asio::async_write(
 		_socket,

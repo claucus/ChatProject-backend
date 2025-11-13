@@ -1,4 +1,4 @@
-﻿#include "FriendDAO.h"
+#include "FriendDAO.h"
 #include <iostream>
 #include <spdlog/spdlog.h>
 #include "Defer.h"
@@ -23,7 +23,7 @@ bool FriendDAO::Update(const FriendRelation& relation)
 			.bind(relation._b_uid)
 			.bind(relation._status)
 			.bind(relation._group.empty() ? "MyFriends" : relation._group)
-			.bind(relation._remark.empty() ? relation._a_uid : relation._remark)
+			.bind(relation._remark.empty() ? relation._b_uid : relation._remark)
 			.execute();
 
 		auto statusResult = conn->sql("SELECT @success").execute();
@@ -70,7 +70,7 @@ bool FriendDAO::InsertApply(const FriendRelation& relation, const std::string& c
 			.bind(relation._status)
 			.bind(comments)
 			.bind(relation._group.empty() ? "MyFriends" : relation._group)
-			.bind(relation._remark.empty() ? relation._a_uid : relation._remark)
+			.bind(relation._remark.empty() ? relation._b_uid : relation._remark)
 			.execute();
 
 		auto statusResult = conn->sql("SELECT @success").execute();
@@ -136,6 +136,14 @@ std::vector<std::shared_ptr<FriendInfo>> FriendDAO::GetUserFriends(const std::st
 		auto result = conn->sql("CALL sp_search_friend(?, @success)")
 			.bind(uid)
 			.execute();
+		std::vector<mysqlx::Row> rows;
+		do{
+			if (result.hasData()) {
+				auto part = result.fetchAll();
+				rows.insert(rows.end(), part.begin(), part.end());
+			}
+		} while (result.nextResult());
+		
 
 		auto statusResult = conn->sql("SELECT @success").execute();
 		auto statusRow = statusResult.fetchOne();
@@ -145,7 +153,7 @@ std::vector<std::shared_ptr<FriendInfo>> FriendDAO::GetUserFriends(const std::st
 			LOG_WARN("Get User Friends failed: uid={}", uid);
 		}
 		else {
-			for (auto row : result.fetchAll()) {
+			for (auto row : rows) {
 				auto relationship = std::make_shared<FriendInfo>(
 					std::make_shared<UserInfo>(
 						row[0].get<std::string>(), // uid
@@ -186,16 +194,23 @@ std::vector<std::shared_ptr<FriendListInfo>> FriendDAO::GetApplyList(const std::
 			.bind(uid)
 			.execute();
 
+		std::vector<mysqlx::Row> rows;
+		do {
+			if (result.hasData()) {
+				auto part = result.fetchAll();
+				rows.insert(rows.end(), part.begin(), part.end());
+			}
+		} while (result.nextResult());
+
 		auto statusResult = conn->sql("SELECT @success").execute();
 		auto statusRow = statusResult.fetchOne();
-		auto rows = result.fetchAll();
 		bool found = statusRow && statusRow[0].get<bool>();
 
 		if (!found) {
 			LOG_WARN("Get Apply List failed: uid={}", uid);
 		}
 		else {
-			if (rows.begin() == rows.end()) {
+			if (rows.empty()) {
 				LOG_WARN("No pending friend requests: uid={}", uid);
 			}
 			else {
@@ -237,10 +252,17 @@ std::vector<std::shared_ptr<SearchInfo>> FriendDAO::Search(const std::string& ui
 			.bind(pattern)
 			.execute();
 
+		std::vector<mysqlx::Row> rows;
+		do {
+			if (result.hasData()) {
+				auto part = result.fetchAll();
+				rows.insert(rows.end(), part.begin(), part.end());
+			}
+		} while (result.nextResult());
+
 		auto statusResult = conn->sql("SELECT @success").execute();
 		auto statusRow = statusResult.fetchOne();
 		bool found = statusRow && statusRow[0].get<bool>();
-		auto rows = result.fetchAll();
 
 		if (!found) {
 			LOG_WARN("Fuzzy Search failed: uid={}, pattern={}", uid, pattern);

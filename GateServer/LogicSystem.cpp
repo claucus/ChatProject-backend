@@ -114,11 +114,13 @@ LogicSystem::LogicSystem()
 				if (b_verifyCode.empty()) {
 					LOG_WARN("Verify code timeout for email: {}", email);
 					root["error"] = static_cast<int>(RegisterResponseCodes::VERIFY_CODE_TIMEOUT);
+					return;
 				}
 
 				if (verifyCode != b_verifyCode) {
 					LOG_WARN("Verify code mismatch for email: {}", email);
 					root["error"] = static_cast<int>(RegisterResponseCodes::VERIFY_CODE_ERROR);
+					return;
 				}
 
 				std::string uid;
@@ -128,6 +130,7 @@ LogicSystem::LogicSystem()
 				if (!verifyResponse) {
 					LOG_WARN("User already exists: {}", email);
 					root["error"] = static_cast<int>(RegisterResponseCodes::USER_EXISTS);
+					return;
 				}
 
 				LOG_INFO("User registered successfully: {}", email);
@@ -176,11 +179,13 @@ LogicSystem::LogicSystem()
 				if (b_verifyCode.empty()) {
 					LOG_WARN("Verify code timeout for email: {}", email);
 					root["error"] = static_cast<int>(ResetResponseCodes::VERIFY_CODE_TIMEOUT);
+					return;
 				}
 
 				if (verifyCode != b_verifyCode) {
 					LOG_WARN("Verify code mismatch for email: {}", email);
 					root["error"] = static_cast<int>(ResetResponseCodes::VERIFY_CODE_ERROR);
+					return;
 				}
 
 				auto resetUser = UserInfo(uid, email, "", newPassword);
@@ -189,6 +194,7 @@ LogicSystem::LogicSystem()
 				if (!resetResponse) {
 					LOG_WARN("User not exists for reset: {}", email);
 					root["error"] = static_cast<int>(ResetResponseCodes::USER_NOT_EXISTS);
+					return;
 				}
 				LOG_INFO("Password reset successful for user: {}", email);
 				root["error"] = static_cast<int>(ResetResponseCodes::RESET_SUCCESS);
@@ -230,17 +236,19 @@ LogicSystem::LogicSystem()
 				auto loginResponse = MySQLManager::GetInstance()->UserLogin(loginUser);
 
 				if (loginResponse == false) {
-					LOG_WARN("Login failed for user: {}", email);
+					LOG_WARN("Login failed for user: {}", email.empty()?uid:email);
 					root["error"] = static_cast<int>(LoginResponseCodes::LOGIN_ERROR);
+					return;
 				}
 
 				auto reply = StatusGrpcClient::GetInstance()->GetChatServer(loginUser._uid);
 				if (reply.error()) {
 					LOG_ERROR("gRPC get chat server failed for uid: {}", loginUser._uid, reply.error());
 					root["error"] = static_cast<int>(LoginResponseCodes::RPC_GET_FAILED);
+					return;
 				}
 
-				LOG_INFO("Login successful for user: {}", email);
+				LOG_INFO("Login successful for user: {}", email.empty() ? uid : email);
 				root["error"] = static_cast<int>(LoginResponseCodes::LOGIN_SUCCESS);
 				root["uid"] = loginUser._uid;
 				root["email"] = loginUser._email;

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 constexpr auto MAX_LENGTH = 1024 * 2;
 constexpr auto BUFFER_SIZE = 1024 * 2;
@@ -15,10 +15,10 @@ constexpr auto HEADER_TOTAL_LENGTH = HEADER_DATA_LENGTH + HEADER_ID_LENGTH;
 
 namespace ChatServiceConstant {
 	constexpr auto LOGIN_COUNT = "login_count";
-	constexpr auto USER_TOKEN_PREFIX = "user_token_";
+	constexpr auto USER_SESSION_PREFIX = "user_session_";
 	constexpr auto USER_INFO_PREFIX = "user_info_";
-	constexpr auto USER_IP_PREFIX = "user_ip_";
 	constexpr auto USER_FRIEND_STATUS = "user_friend_status_";
+	constexpr auto FRIEND_REQUEST_PREFIX = "friend_request_";
 }
 
 enum class ErrorCodes

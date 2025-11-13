@@ -1,4 +1,4 @@
-﻿#include "FriendServerImpl.h"
+#include "FriendServerImpl.h"
 #include "UserManager.h"
 #include "CSession.h"
 #include "const.h"
@@ -43,6 +43,7 @@ grpc::Status FriendServerImpl::SendFriend(grpc::ServerContext* context, const me
 	notify["username"] = request->username();
 
 	session->Send(notify.dump(4), static_cast<int>(MessageID::MESSAGE_NOTIFY_ADD_FRIEND));
+	LOG_INFO("Send json is {}", notify.dump(4));
 
 	return grpc::Status::OK;
 }
@@ -85,10 +86,31 @@ grpc::Status FriendServerImpl::HandleFriend(grpc::ServerContext* context, const 
 		notify["sex"] = userInfo->_sex;
 
 		notify["grouping"] = request->grouping();
-		notify["remark"] = request->remark();
+
+		std::string localRemark;
+		try {
+			auto friends = MySQLManager::GetInstance()->GetFriendList(recipient);
+			for (const auto& f : friends) {
+				if (f && f->_user && f->_user->_uid == applicant) {
+					localRemark = f->_remark;
+					break;
+				}
+			}
+		}
+		catch (const std::exception& e) {
+			LOG_WARN("Failed to fetch friend list to obtain local remark: {}", e.what());
+		}
+
+		if (!localRemark.empty()) {
+			notify["remark"] = localRemark;
+		}
+		else {
+			notify["remark"] = request->remark();
+		}
 	}
 	
 	session->Send(notify.dump(4),static_cast<int>(MessageID::MESSAGE_NOTIFY_APPROVAL_FRIEND));
+	LOG_INFO("Send json is {}", notify.dump(4));
 
 	return grpc::Status::OK;
 }

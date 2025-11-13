@@ -2,12 +2,13 @@
 
 constexpr auto CODE_PREFIX = "code_";
 
+const auto SESSION_EXPIRE_SECONDS = 24 * 60 * 60;
 
 namespace ChatServiceConstant {
 	constexpr auto LOGIN_COUNT = "login_count";
+	constexpr auto USER_SESSION_PREFIX = "user_session_";
 	constexpr auto USER_TOKEN_PREFIX = "user_token_";
 	constexpr auto USER_INFO_PREFIX = "user_info_";
-	constexpr auto USER_IP_PREFIX = "user_ip_";
 }
 
 
