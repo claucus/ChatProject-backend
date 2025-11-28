@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决�
 		C:\Users\Schwarz\Desktop\ChatServer1.log = C:\Users\Schwarz\Desktop\ChatServer1.log
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UserServer", "..\UserServer\UserServer.vcxproj", "{ECB941D2-1980-45A2-9317-B4AA1EED0EFD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -58,6 +60,14 @@ Global
 		{52184747-47E8-4409-AA17-0EEC267D9067}.Release|x64.Build.0 = Release|x64
 		{52184747-47E8-4409-AA17-0EEC267D9067}.Release|x86.ActiveCfg = Release|Win32
 		{52184747-47E8-4409-AA17-0EEC267D9067}.Release|x86.Build.0 = Release|Win32
+		{ECB941D2-1980-45A2-9317-B4AA1EED0EFD}.Debug|x64.ActiveCfg = Debug|x64
+		{ECB941D2-1980-45A2-9317-B4AA1EED0EFD}.Debug|x64.Build.0 = Debug|x64
+		{ECB941D2-1980-45A2-9317-B4AA1EED0EFD}.Debug|x86.ActiveCfg = Debug|Win32
+		{ECB941D2-1980-45A2-9317-B4AA1EED0EFD}.Debug|x86.Build.0 = Debug|Win32
+		{ECB941D2-1980-45A2-9317-B4AA1EED0EFD}.Release|x64.ActiveCfg = Release|x64
+		{ECB941D2-1980-45A2-9317-B4AA1EED0EFD}.Release|x64.Build.0 = Release|x64
+		{ECB941D2-1980-45A2-9317-B4AA1EED0EFD}.Release|x86.ActiveCfg = Release|Win32
+		{ECB941D2-1980-45A2-9317-B4AA1EED0EFD}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

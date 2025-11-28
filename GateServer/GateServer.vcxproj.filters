@@ -51,34 +51,22 @@
     <ClInclude Include="GrpcPool.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="RedisConPool.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="MySQLConPool.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseDAO.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="UserInfo.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="UserDAO.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="MySQLManager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="StatusGrpcClient.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Defer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="FriendDAO.h">
+    <ClInclude Include="Logger.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Logger.h">
+    <ClInclude Include="UserGrpcClient.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="user.grpc.pb.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="user.pb.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -110,27 +98,22 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="RedisConPool.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="MySQLConPool.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="UserDAO.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="MySQLManager.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="StatusGrpcClient.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="FriendDAO.cpp">
+    <ClCompile Include="UserGrpcClient.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="user.grpc.pb.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="user.pb.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="message.proto" />
     <None Include="config.ini" />
+    <None Include="user.proto" />
   </ItemGroup>
 </Project>

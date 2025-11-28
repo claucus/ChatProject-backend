@@ -1,0 +1,134 @@
+syntax = "proto3";
+
+package user;
+
+import "google/protobuf/timestamp.proto";
+
+//
+// ============= User Service =============
+//  Handles:
+//   - Registration
+//   - Login verification
+//   - Password reset
+//   - Basic profile fetch
+//   - CAPTCHA checking requested by GateServer
+//
+
+service UserService {
+
+  // 1. Verify email verification code
+  rpc VerifyEmailCode(VerifyEmailCodeReq) returns (VerifyEmailCodeResp);
+
+  // 2. Register new user (idempotent)
+  rpc RegisterUser(RegisterUserReq) returns (RegisterUserResp);
+
+  // 3. Login verification (password check)
+  rpc VerifyLogin(VerifyLoginReq) returns (VerifyLoginResp);
+
+  // 4. Reset password
+  rpc ResetPassword(ResetPasswordReq) returns (ResetPasswordResp);
+
+  // 5. Fetch user basic info (for login or friend lists)
+  rpc GetUserProfile(GetUserProfileReq) returns (GetUserProfileResp);
+
+  // 6. Update user profile (not used yet by GateServer but necessary)
+  rpc UpdateUserProfile(UpdateUserProfileReq) returns (UpdateUserProfileResp);
+}
+
+//
+// ============= Messages =============
+//
+
+message VerifyEmailCodeReq {
+  string email = 1;
+  string code = 2;              // user submitted
+}
+
+message VerifyEmailCodeResp {
+  bool ok = 1;
+  int32 error = 2;              // same codes as your GateServer RegisterResponseCodes
+}
+
+//
+// ============= Registration =============
+//
+
+message RegisterUserReq {
+  string email = 1;
+  string username = 2;
+  string password = 3;
+  string verify_code = 4;
+  string request_id = 5;        // for idempotency (optional)
+}
+
+message RegisterUserResp {
+  bool ok = 1;
+  int32 error = 2;              // USER_EXISTS, VERIFY_CODE_ERROR, etc.
+  string uid = 3;
+  string email = 4;
+  string username = 5;
+}
+
+//
+// ============= Login =============
+//
+
+message VerifyLoginReq {
+  string uid = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message VerifyLoginResp {
+  bool ok = 1;
+  int32 error = 2;               // LOGIN_ERROR, etc.
+  string uid = 3;
+  string email = 4;
+}
+
+//
+// ============= Password Reset =============
+//
+
+message ResetPasswordReq {
+  string uid = 1;
+  string email = 2;
+  string new_password = 3;
+  string verify_code = 4;
+}
+
+message ResetPasswordResp {
+  bool ok = 1;
+  int32 error = 2;               // VERIFY_CODE_TIMEOUT, USER_NOT_EXISTS, etc.
+}
+
+//
+// ============= Profile =============
+//
+
+message GetUserProfileReq {
+  string uid = 1;
+}
+
+message GetUserProfileResp {
+  bool ok = 1;
+  string uid = 2;
+  string email = 3;
+  string username = 4;
+  string birth = 5;
+  string sex = 6;
+  string avatar = 7;
+}
+
+message UpdateUserProfileReq {
+  string uid = 1;
+  string username = 2;
+  string birth = 3;
+  string sex = 4;
+  string avatar = 5;            // avatar URL
+}
+
+message UpdateUserProfileResp {
+  bool ok = 1;
+  int32 error = 2;
+}

@@ -1,4 +1,4 @@
-﻿#include "UserDAO.h"
+#include "UserDAO.h"
 #include <iostream>
 #include "Defer.h"
 #include "Logger.h"
@@ -11,16 +11,16 @@ bool UserDAO::Insert(const UserInfo& user)
 	};
 
 	try {
-		LOG_INFO("Inserting user: uid={}, email={}", user._uid, user._email);
+		LOG_INFO("Inserting user: uid={}, email={}", user.uid, user.email);
 		auto result = conn->sql("CALL sp_insert_user(?, ?, ?, ?, ?, ?, ?, ?, @success)")
-			.bind(user._uid)
-			.bind(user._email)
-			.bind(user._username)
-			.bind(user._password)
+			.bind(user.uid)
+			.bind(user.email)
+			.bind(user.username)
+			.bind(user.password)
 			.bind(ENCRYPTION_KEY)
-			.bind(user._birth.empty() ? "1900-1-1" : user._birth)
-			.bind(user._sex.empty() ? "unknown" : user._sex)
-			.bind(user._avatar.empty() ? ("./avatars/" + user._uid + ".png") : user._avatar)
+			.bind(user.birth.empty() ? "1900-1-1" : user.birth)
+			.bind(user.sex.empty() ? "unknown" : user.sex)
+			.bind(user.avatar.empty() ? ("./avatars/" + user.uid + ".png") : user.avatar)
 			.execute();
 
 		auto statusResult = conn->sql("SELECT @success").execute();
@@ -29,15 +29,15 @@ bool UserDAO::Insert(const UserInfo& user)
 
 
 		if (success) {
-			LOG_INFO("Insert user success: uid={}", user._uid);
+			LOG_INFO("Insert user success: uid={}", user.uid);
 		}
 		else {
-			LOG_WARN("Insert user failed: uid={}", user._uid);
+			LOG_WARN("Insert user failed: uid={}", user.uid);
 		}
 		return success;
 	}
 	catch (const mysqlx::Error& error) {
-		LOG_ERROR("MySQL Error on insert: {} (uid={}, email={})", error.what(), user._uid, user._email);
+		LOG_ERROR("MySQL Error on insert: {} (uid={}, email={})", error.what(), user.uid, user.email);
 		return false;
 	}
 }
@@ -50,15 +50,15 @@ bool UserDAO::Update(const UserInfo& user)
 	};
 
 	try {
-		LOG_INFO("Updating user: uid={}, email={}", user._uid, user._email);
+		LOG_INFO("Updating user: uid={}, email={}", user.uid, user.email);
 		auto result = conn->sql("CALL sp_update_user(?, ?, ?, ?, ?, ?, ?, @success)")
-			.bind(user._uid)
-			.bind(user._email)
-			.bind(user._password)
+			.bind(user.uid)
+			.bind(user.email)
+			.bind(user.password)
 			.bind(ENCRYPTION_KEY)
-			.bind(user._birth.empty() ? "1900-1-1" : user._birth)
-			.bind(user._sex.empty() ? "unknown" : user._sex)
-			.bind(user._avatar.empty() ? ("./avatars/" + user._uid + ".png") : user._avatar)
+			.bind(user.birth.empty() ? "1900-1-1" : user.birth)
+			.bind(user.sex.empty() ? "unknown" : user.sex)
+			.bind(user.avatar.empty() ? ("./avatars/" + user.uid + ".png") : user.avatar)
 			.execute();
 
 		auto statusResult = conn->sql("SELECT @success").execute();
@@ -66,15 +66,15 @@ bool UserDAO::Update(const UserInfo& user)
 		bool success = row[0].get<bool>();
 
 		if (success) {
-			LOG_INFO("Update user success: uid={}", user._uid);
+			LOG_INFO("Update user success: uid={}", user.uid);
 		}
 		else {
-			LOG_WARN("Update user failed: uid={}", user._uid);
+			LOG_WARN("Update user failed: uid={}", user.uid);
 		}
 		return success;
 	}
 	catch (const mysqlx::Error& error) {
-		LOG_ERROR("MySQL Error on update: {} (uid={}, email={})", error.what(), user._uid, user._email);
+		LOG_ERROR("MySQL Error on update: {} (uid={}, email={})", error.what(), user.uid, user.email);
 		return false;
 	}
 }
@@ -144,7 +144,7 @@ std::unique_ptr<UserInfo> UserDAO::Search(const std::string& uid)
 				row[6].isNull() ? "" : row[6].get<std::string>(), //avatar
 				row[5].isNull() ? "" : row[5].get<std::string>() //sex
 			);
-			LOG_INFO("User found: uid={}, email={}", userInfo->_uid, userInfo->_email);
+			LOG_INFO("User found: uid={}, email={}", userInfo->uid, userInfo->email);
 			return userInfo;
 		}
 

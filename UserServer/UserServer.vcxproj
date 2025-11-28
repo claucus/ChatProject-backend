@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{b0d7f91a-8722-4bc1-80d1-1c8946e12bb6}</ProjectGuid>
-    <RootNamespace>GateServer</RootNamespace>
+    <ProjectGuid>{ecb941d2-1980-45a2-9317-b4aa1eed0efd}</ProjectGuid>
+    <RootNamespace>UserServer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -99,11 +99,10 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>false</SDLCheck>
+      <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -126,44 +125,35 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ConfigManager.h" />
-    <ClInclude Include="CServer.h" />
-    <ClInclude Include="Defer.h" />
-    <ClInclude Include="HttpConnection.h" />
-    <ClInclude Include="IOContextPool.h" />
-    <ClInclude Include="Logger.h" />
-    <ClInclude Include="LogicSystem.h" />
-    <ClInclude Include="message.grpc.pb.h" />
-    <ClInclude Include="message.pb.h" />
-    <ClInclude Include="GrpcPool.h" />
-    <ClInclude Include="Singleton.h" />
-    <ClInclude Include="const.h" />
-    <ClInclude Include="StatusGrpcClient.h" />
-    <ClInclude Include="Transformer.h" />
-    <ClInclude Include="user.grpc.pb.h" />
-    <ClInclude Include="user.pb.h" />
-    <ClInclude Include="UserGrpcClient.h" />
-    <ClInclude Include="VerifyGrpcClient.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="ConfigManager.cpp" />
-    <ClCompile Include="CServer.cpp" />
-    <ClCompile Include="HttpConnection.cpp" />
-    <ClCompile Include="IOContextPool.cpp" />
-    <ClCompile Include="LogicSystem.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="message.grpc.pb.cc" />
-    <ClCompile Include="message.pb.cc" />
-    <ClCompile Include="StatusGrpcClient.cpp" />
+    <ClCompile Include="MySQLConPool.cpp" />
+    <ClCompile Include="MySQLManager.cpp" />
+    <ClCompile Include="RedisConPool.cpp" />
     <ClCompile Include="user.grpc.pb.cc" />
     <ClCompile Include="user.pb.cc" />
-    <ClCompile Include="UserGrpcClient.cpp" />
-    <ClCompile Include="VerifyGrpcClient.cpp" />
+    <ClCompile Include="UserDAO.cpp" />
+    <ClCompile Include="UserServerImpl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="config.ini" />
-    <None Include="message.proto" />
     <None Include="user.proto" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BaseDAO.h" />
+    <ClInclude Include="ConfigManager.h" />
+    <ClInclude Include="const.h" />
+    <ClInclude Include="Defer.h" />
+    <ClInclude Include="Logger.h" />
+    <ClInclude Include="MySQLConPool.h" />
+    <ClInclude Include="MySQLManager.h" />
+    <ClInclude Include="RedisConPool.h" />
+    <ClInclude Include="Singleton.h" />
+    <ClInclude Include="user.grpc.pb.h" />
+    <ClInclude Include="user.pb.h" />
+    <ClInclude Include="UserDAO.h" />
+    <ClInclude Include="UserInfo.h" />
+    <ClInclude Include="UserServerImpl.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

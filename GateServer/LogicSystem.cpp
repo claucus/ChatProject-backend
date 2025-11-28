@@ -1,10 +1,10 @@
-﻿#include "const.h"
+#include "const.h"
 #include "HttpConnection.h"
 #include "LogicSystem.h"
-#include "RedisConPool.h"
 #include "VerifyGrpcClient.h"
-#include "MySQLManager.h"
 #include "StatusGrpcClient.h"
+#include "UserGrpcClient.h"
+
 #include "Defer.h"
 #include "Logger.h"
 
@@ -75,7 +75,7 @@ LogicSystem::LogicSystem()
 
 				root["error"] = response.error();
 				root["email"] = email;
-				root["verify_code"] = RedisConPool::GetInstance().get(CODE_PREFIX + email).value();
+				root["verify_code"] = response.code();
 			}
 			catch (const json::parse_error& e) {
 				LOG_WARN("Failed to parse JSON in /postVerifyCode: {}", e.what());
@@ -109,38 +109,27 @@ LogicSystem::LogicSystem()
 				std::string password = src["password"].get<std::string>();
 				std::string verifyCode = src["verify_code"].get<std::string>();
 
-				auto b_verifyCode = RedisConPool::GetInstance().get(CODE_PREFIX + email).value();
 
-				if (b_verifyCode.empty()) {
-					LOG_WARN("Verify code timeout for email: {}", email);
-					root["error"] = static_cast<int>(RegisterResponseCodes::VERIFY_CODE_TIMEOUT);
+				user::RegisterUserReq req;
+				req.set_email(email);
+				req.set_username(username);
+				req.set_password(password);
+				req.set_verify_code(verifyCode);
+
+				auto response = UserGrpcClient::GetInstance()->RegisterUser(req);
+
+				if (response.error() != static_cast<int>(RegisterResponseCodes::REGISTER_SUCCESS)) {
+					LOG_WARN("User registration failed for email: {}, error code: {}", email, response.error());
+					root["error"] = response.error();
 					return;
 				}
 
-				if (verifyCode != b_verifyCode) {
-					LOG_WARN("Verify code mismatch for email: {}", email);
-					root["error"] = static_cast<int>(RegisterResponseCodes::VERIFY_CODE_ERROR);
-					return;
-				}
-
-				std::string uid;
-				auto registerUser = UserInfo(uid, email, username, password);
-				auto verifyResponse = MySQLManager::GetInstance()->RegisterUser(registerUser);
-
-				if (!verifyResponse) {
-					LOG_WARN("User already exists: {}", email);
-					root["error"] = static_cast<int>(RegisterResponseCodes::USER_EXISTS);
-					return;
-				}
-
-				LOG_INFO("User registered successfully: {}", email);
-				root["error"] = static_cast<int>(RegisterResponseCodes::REGISTER_SUCCESS);
-				root["uid"] = registerUser._uid;
-				root["username"] = registerUser._username;
-				root["email"] = registerUser._email;
-				root["password"] = registerUser._password;
+				root["error"] = response.error();
+				root["uid"] = response.uid();
+				root["username"] = response.username();
+				root["email"] = response.email();
+				root["password"] = password;
 				root["verify_code"] = verifyCode;
-
 			}
 			catch (const json::parse_error& e) {
 				LOG_WARN("Failed to parse JSON in /userRegister: {}", e.what());
@@ -174,33 +163,25 @@ LogicSystem::LogicSystem()
 				std::string newPassword = src["new_password"].get<std::string>();
 				std::string verifyCode = src["verify_code"].get<std::string>();
 
-				auto b_verifyCode = RedisConPool::GetInstance().get(CODE_PREFIX + email).value();
 
-				if (b_verifyCode.empty()) {
-					LOG_WARN("Verify code timeout for email: {}", email);
-					root["error"] = static_cast<int>(ResetResponseCodes::VERIFY_CODE_TIMEOUT);
+				user::ResetPasswordReq req;
+				req.set_email(email);
+				req.set_uid(uid);
+				req.set_new_password(newPassword);
+				req.set_verify_code(verifyCode);
+
+				auto response = UserGrpcClient::GetInstance()->ResetPassword(req);
+
+				if (response.error() != static_cast<int>(ResetResponseCodes::RESET_SUCCESS)) {
+					LOG_WARN("Password reset failed for email: {}, error code: {}", email, response.error());
+					root["error"] = response.error();
 					return;
 				}
 
-				if (verifyCode != b_verifyCode) {
-					LOG_WARN("Verify code mismatch for email: {}", email);
-					root["error"] = static_cast<int>(ResetResponseCodes::VERIFY_CODE_ERROR);
-					return;
-				}
-
-				auto resetUser = UserInfo(uid, email, "", newPassword);
-				auto resetResponse = MySQLManager::GetInstance()->ResetPassword(resetUser);
-
-				if (!resetResponse) {
-					LOG_WARN("User not exists for reset: {}", email);
-					root["error"] = static_cast<int>(ResetResponseCodes::USER_NOT_EXISTS);
-					return;
-				}
-				LOG_INFO("Password reset successful for user: {}", email);
-				root["error"] = static_cast<int>(ResetResponseCodes::RESET_SUCCESS);
-				root["uid"] = resetUser._uid;
-				root["email"] = resetUser._email;
-				root["password"] = resetUser._password;
+				root["error"] = response.error();
+				root["uid"] = uid;
+				root["email"] = email;
+				root["password"] = newPassword;
 			}
 			catch (const json::parse_error& e) {
 				LOG_WARN("Failed to parse JSON in /resetPassword: {}", e.what());
@@ -232,26 +213,31 @@ LogicSystem::LogicSystem()
 				std::string email = src["email"].get<std::string>();
 				std::string password = src["password"].get<std::string>();
 
-				auto loginUser = UserInfo(uid, email, "", password);
-				auto loginResponse = MySQLManager::GetInstance()->UserLogin(loginUser);
+				user::VerifyLoginReq req;
+				req.set_uid(uid);
+				req.set_email(email);
+				req.set_password(password);
 
-				if (loginResponse == false) {
-					LOG_WARN("Login failed for user: {}", email.empty()?uid:email);
-					root["error"] = static_cast<int>(LoginResponseCodes::LOGIN_ERROR);
+				auto response = UserGrpcClient::GetInstance()->VerifyLogin(req);
+
+				if (response.error() != static_cast<int>(LoginResponseCodes::LOGIN_SUCCESS)) {
+					LOG_WARN("User login failed for user: {}, error code: {}", email.empty()?uid:email, response.error());
+					root["error"] = response.error();
 					return;
 				}
 
-				auto reply = StatusGrpcClient::GetInstance()->GetChatServer(loginUser._uid);
+
+				auto reply = StatusGrpcClient::GetInstance()->GetChatServer(response.uid());
 				if (reply.error()) {
-					LOG_ERROR("gRPC get chat server failed for uid: {}", loginUser._uid, reply.error());
+					LOG_ERROR("gRPC get chat server failed for uid: {}", response.uid(), reply.error());
 					root["error"] = static_cast<int>(LoginResponseCodes::RPC_GET_FAILED);
 					return;
 				}
 
 				LOG_INFO("Login successful for user: {}", email.empty() ? uid : email);
 				root["error"] = static_cast<int>(LoginResponseCodes::LOGIN_SUCCESS);
-				root["uid"] = loginUser._uid;
-				root["email"] = loginUser._email;
+				root["uid"] = response.uid();
+				root["email"] = response.email();
 				root["token"] = reply.token();
 				root["host"] = reply.host();
 				root["port"] = reply.port();
