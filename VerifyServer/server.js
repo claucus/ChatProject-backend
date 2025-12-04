@@ -1,5 +1,5 @@
 const grpc = require("@grpc/grpc-js")
-const message_proto = require("./proto")
+const verify_proto = require("./proto")
 const const_module = require("./const")
 const {v4:uuidv4} = require("uuid")
 const email_module = require("./email")
@@ -39,7 +39,8 @@ async function GetVerifyCode(call,callback){
 
         callback(null,{
             email:call.request.email,
-            error:const_module.Errors.SUCCESS
+            error:const_module.Errors.SUCCESS,
+            code:unique_id
         })
 
     }catch(error){
@@ -54,7 +55,7 @@ async function GetVerifyCode(call,callback){
 
 function main(){
     var server = new grpc.Server()
-    server.addService(message_proto.VerifyService.service,{
+    server.addService(verify_proto.VerifyService.service,{
         GetVerifyCode:GetVerifyCode
     })
     server.bindAsync("127.0.0.1:50051",grpc.ServerCredentials.createInsecure(),()=>{

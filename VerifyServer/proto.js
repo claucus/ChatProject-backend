@@ -2,12 +2,12 @@ const path = require("path")
 const grpc = require("@grpc/grpc-js")
 const protoLoader = require("@grpc/proto-loader")
 
-const PROTO_PATH = path.join(__dirname,"message.proto")
+const PROTO_PATH = path.join(__dirname,"verify.proto")
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH,{keepCase:true,longs:String,enums:String,defaults:true,oneofs:true})
 
 const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 
-const message_proto = protoDescriptor.message
+const verify_proto = protoDescriptor.verify
 
-module.exports = message_proto
+module.exports = verify_proto

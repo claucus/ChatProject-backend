@@ -2,12 +2,12 @@
 #include "ConfigManager.h"
 #include "Logger.h"
 
-message::GetVerifyResponse VerifyGrpcClient::GetVerifyCode(std::string email)
+verify::GetVerifyResp VerifyGrpcClient::GetVerifyCode(std::string email)
 {
 	grpc::ClientContext context;
-	message::GetVerifyRequest request;
-	message::GetVerifyResponse response;
-
+	verify::GetVerifyReq request;
+	verify::GetVerifyResp response;
+	
 	request.set_email(email);
 	auto stub = _pool->GetConnection();
 	LOG_INFO("Calling GetVerifyCode for email={}", email);
