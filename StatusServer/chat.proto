@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package chat;
+
+import "google/protobuf/timestamp.proto";
+
+service ChatService{
+    // kick user if already online
+    rpc KickUser(KickUserReq) returns (KickUserResp);
+}
+
+
+// --------------------
+// KickUser
+// --------------------
+message KickUserReq{
+    string uid = 1;
+    int32 reason = 2;
+}
+
+message KickUserResp{
+    int32 error = 1;
+}

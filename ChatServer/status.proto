@@ -1,0 +1,162 @@
+syntax = "proto3";
+
+package status;
+
+import "google/protobuf/timestamp.proto";
+
+
+service StatusService {
+    // Node lifecycle
+    rpc RegisterNode(RegisterNodeReq) returns (RegisterNodeResp);
+    rpc DeregisterNode(DeregisterNodeReq) returns (DeregisterNodeResp);
+    rpc Heartbeat(HeartbeatReq) returns (HeartbeatResp);
+
+    // load balancing / allocation
+    rpc AllocateServer(AllocateServerReq) returns (AllocateServerResp);
+
+    // user presence / routing
+    rpc ReportOnline(OnlineReportReq) returns (OnlineReportResp);
+    rpc ReportOffline(OfflineReportReq) returns (OfflineReportResp);
+    rpc QueryUserRoute(RouteReq) returns (RouteResp);
+
+    // kick user if already online
+    rpc KickUser(KickUserReq) returns (KickUserResp);
+
+    // admin
+    rpc GetNodes(GetNodesReq) returns (GetNodesResp);
+}
+
+
+// --------------------
+// Node registration (ChatServer -> StatusServer)
+// ChatServer registers itself on startup and heartbeats.
+// --------------------
+message RegisterNodeReq {
+    string name = 1;       // unique server id
+    string server_host = 2;
+    int32 server_port = 3;
+    int32 capacity = 4;    // optional: max connections or weight
+}
+
+message RegisterNodeResp {
+    int32 error = 1;
+}
+
+// Deregister node (at shutdown)
+message DeregisterNodeReq {
+    string name = 1;
+}
+
+message DeregisterNodeResp { 
+  int32 error = 1; 
+}
+
+// Heartbeat to keep node alive
+message HeartbeatReq {
+    string name = 1; 
+    string server_host = 2; 
+    int32 server_port = 3; 
+}
+
+message HeartbeatResp {
+    int32 error = 1; 
+}
+
+
+// --------------------
+// Load balancing: allocate a ChatServer for a newly-logging-in user
+// Called by GateServer during login (or by any service that needs an assignment).
+// --------------------
+message AllocateServerReq {
+    string uid = 1;
+}
+
+message AllocateServerResp {
+    int32 error = 1;
+    bool assigned = 2;        // true if assigned now
+
+    string server_name = 3;   // server id
+    string server_host = 4;
+    int32 server_port = 5;
+
+    string token = 6;         // auth token for the client to use with ChatServer
+    int64  expires_at = 7;    // unix epoch in seconds
+}
+
+
+// --------------------
+// User status reporting (ChatServer -> StatusServer)
+// Report user online/offline after login/logout or connection events
+// --------------------
+message OnlineReportReq {
+    string uid = 1;
+
+    string server_name = 2; // which ChatServer hosts this user
+    string server_host = 3;
+    int32  server_port = 4;
+
+    string token = 5;
+}
+
+message OnlineReportResp {
+    int32 error = 1; 
+}
+
+message OfflineReportReq {
+    string uid = 1; 
+}
+
+message OfflineReportResp {
+    int32 error = 1;
+}
+
+// Query user route (FriendServer/MessageServer -> StatusServer)
+message RouteReq {
+    string uid = 1; 
+}
+
+message RouteResp {
+    int32 error = 1;
+    bool online = 2;
+
+    string server_name = 3;
+    string server_host = 4;
+    int32  server_port = 5;
+
+    string token = 6;
+    int64 last_logout = 7;
+}
+
+// --------------------
+// KickUser
+// --------------------
+message KickUserReq{
+    string uid = 1;
+    int32 reason = 2;
+}
+
+message KickUserResp{
+    int32 error = 1;
+}
+
+// --------------------
+// Admin / monitoring
+// --------------------
+message GetNodesReq {
+
+}
+
+message NodeInfo {
+    string name = 1;
+    string server_host = 2;
+    int32 server_port = 3;
+
+    int32 current_load = 4; // number of assigned users
+    int32 capacity = 5;
+    int64 last_heartbeat = 6;
+}
+
+message GetNodesResp {
+    int32 error = 1;
+    repeated NodeInfo nodes = 2;
+}

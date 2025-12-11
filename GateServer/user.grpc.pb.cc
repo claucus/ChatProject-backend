@@ -28,6 +28,7 @@ static const char* UserService_method_names[] = {
   "/user.UserService/ResetPassword",
   "/user.UserService/GetUserProfile",
   "/user.UserService/UpdateUserProfile",
+  "/user.UserService/FuzzySearchUser",
 };
 
 std::unique_ptr< UserService::Stub> UserService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -43,6 +44,7 @@ UserService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channe
   , rpcmethod_ResetPassword_(UserService_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_GetUserProfile_(UserService_method_names[4], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_UpdateUserProfile_(UserService_method_names[5], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_FuzzySearchUser_(UserService_method_names[6], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status UserService::Stub::VerifyEmailCode(::grpc::ClientContext* context, const ::user::VerifyEmailCodeReq& request, ::user::VerifyEmailCodeResp* response) {
@@ -183,6 +185,29 @@ void UserService::Stub::async::UpdateUserProfile(::grpc::ClientContext* context,
   return result;
 }
 
+::grpc::Status UserService::Stub::FuzzySearchUser(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq& request, ::user::FuzzySearchUserResp* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::user::FuzzySearchUserReq, ::user::FuzzySearchUserResp, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_FuzzySearchUser_, context, request, response);
+}
+
+void UserService::Stub::async::FuzzySearchUser(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq* request, ::user::FuzzySearchUserResp* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::user::FuzzySearchUserReq, ::user::FuzzySearchUserResp, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_FuzzySearchUser_, context, request, response, std::move(f));
+}
+
+void UserService::Stub::async::FuzzySearchUser(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq* request, ::user::FuzzySearchUserResp* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_FuzzySearchUser_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::user::FuzzySearchUserResp>* UserService::Stub::PrepareAsyncFuzzySearchUserRaw(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::user::FuzzySearchUserResp, ::user::FuzzySearchUserReq, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_FuzzySearchUser_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::user::FuzzySearchUserResp>* UserService::Stub::AsyncFuzzySearchUserRaw(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncFuzzySearchUserRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 UserService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       UserService_method_names[0],
@@ -244,6 +269,16 @@ UserService::Service::Service() {
              ::user::UpdateUserProfileResp* resp) {
                return service->UpdateUserProfile(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      UserService_method_names[6],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< UserService::Service, ::user::FuzzySearchUserReq, ::user::FuzzySearchUserResp, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](UserService::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::user::FuzzySearchUserReq* req,
+             ::user::FuzzySearchUserResp* resp) {
+               return service->FuzzySearchUser(ctx, req, resp);
+             }, this)));
 }
 
 UserService::Service::~Service() {
@@ -285,6 +320,13 @@ UserService::Service::~Service() {
 }
 
 ::grpc::Status UserService::Service::UpdateUserProfile(::grpc::ServerContext* context, const ::user::UpdateUserProfileReq* request, ::user::UpdateUserProfileResp* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status UserService::Service::FuzzySearchUser(::grpc::ServerContext* context, const ::user::FuzzySearchUserReq* request, ::user::FuzzySearchUserResp* response) {
   (void) context;
   (void) request;
   (void) response;

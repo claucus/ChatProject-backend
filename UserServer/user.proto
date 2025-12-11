@@ -11,6 +11,8 @@ import "google/protobuf/timestamp.proto";
 //   - Login verification
 //   - Password reset
 //   - Basic profile fetch
+//   - Profile update
+//   - Fuzzy user search
 //   - CAPTCHA checking requested by GateServer
 //
 
@@ -31,8 +33,11 @@ service UserService {
   // 5. Fetch user basic info (for login or friend lists)
   rpc GetUserProfile(GetUserProfileReq) returns (GetUserProfileResp);
 
-  // 6. Update user profile (not used yet by GateServer but necessary)
+  // 6. Update user profile
   rpc UpdateUserProfile(UpdateUserProfileReq) returns (UpdateUserProfileResp);
+
+  // 7. Fuzzy Search a user by uid and pattern
+  rpc FuzzySearchUser(FuzzySearchUserReq) returns (FuzzySearchUserResp);
 }
 
 //
@@ -131,4 +136,19 @@ message UpdateUserProfileReq {
 message UpdateUserProfileResp {
   bool ok = 1;
   int32 error = 2;
+}
+
+
+//
+// ============= Search =============
+//
+
+message FuzzySearchUserReq{
+  string uid = 1;
+  string pattern = 2;
+}
+
+message FuzzySearchUserResp{
+  int32 error = 1;
+  repeated GetUserProfileResp results = 2;
 }

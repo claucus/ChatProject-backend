@@ -133,16 +133,18 @@
     <ClInclude Include="IOContextPool.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="LogicSystem.h" />
-    <ClInclude Include="message.grpc.pb.h" />
-    <ClInclude Include="message.pb.h" />
     <ClInclude Include="GrpcPool.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="const.h" />
+    <ClInclude Include="status.grpc.pb.h" />
+    <ClInclude Include="status.pb.h" />
     <ClInclude Include="StatusGrpcClient.h" />
     <ClInclude Include="Transformer.h" />
     <ClInclude Include="user.grpc.pb.h" />
     <ClInclude Include="user.pb.h" />
     <ClInclude Include="UserGrpcClient.h" />
+    <ClInclude Include="verify.grpc.pb.h" />
+    <ClInclude Include="verify.pb.h" />
     <ClInclude Include="VerifyGrpcClient.h" />
   </ItemGroup>
   <ItemGroup>
@@ -152,18 +154,21 @@
     <ClCompile Include="IOContextPool.cpp" />
     <ClCompile Include="LogicSystem.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="message.grpc.pb.cc" />
-    <ClCompile Include="message.pb.cc" />
+    <ClCompile Include="status.grpc.pb.cc" />
+    <ClCompile Include="status.pb.cc" />
     <ClCompile Include="StatusGrpcClient.cpp" />
     <ClCompile Include="user.grpc.pb.cc" />
     <ClCompile Include="user.pb.cc" />
     <ClCompile Include="UserGrpcClient.cpp" />
+    <ClCompile Include="verify.grpc.pb.cc" />
+    <ClCompile Include="verify.pb.cc" />
     <ClCompile Include="VerifyGrpcClient.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="config.ini" />
-    <None Include="message.proto" />
+    <None Include="status.proto" />
     <None Include="user.proto" />
+    <None Include="verify.proto" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

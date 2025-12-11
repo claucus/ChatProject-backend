@@ -7,7 +7,6 @@
 #include <queue>
 #include <condition_variable>
 #include <grpcpp/grpcpp.h>
-#include "message.grpc.pb.h"
 
 template <typename ServiceType,typename StubType>
 class GrpcPool

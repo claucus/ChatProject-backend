@@ -227,7 +227,7 @@ LogicSystem::LogicSystem()
 				}
 
 
-				auto reply = StatusGrpcClient::GetInstance()->GetChatServer(response.uid());
+				auto reply = StatusGrpcClient::GetInstance()->AllocateServer(response.uid());
 				if (reply.error()) {
 					LOG_ERROR("gRPC get chat server failed for uid: {}", response.uid(), reply.error());
 					root["error"] = static_cast<int>(LoginResponseCodes::RPC_GET_FAILED);
@@ -239,8 +239,8 @@ LogicSystem::LogicSystem()
 				root["uid"] = response.uid();
 				root["email"] = response.email();
 				root["token"] = reply.token();
-				root["host"] = reply.host();
-				root["port"] = reply.port();
+				root["host"] = reply.server_host();
+				root["port"] = reply.server_port();
 
 			}
 			catch (const json::parse_error& e) {

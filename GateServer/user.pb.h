@@ -53,6 +53,12 @@ struct TableStruct_user_2eproto {
 extern const ::google::protobuf::internal::DescriptorTable
     descriptor_table_user_2eproto;
 namespace user {
+class FuzzySearchUserReq;
+struct FuzzySearchUserReqDefaultTypeInternal;
+extern FuzzySearchUserReqDefaultTypeInternal _FuzzySearchUserReq_default_instance_;
+class FuzzySearchUserResp;
+struct FuzzySearchUserRespDefaultTypeInternal;
+extern FuzzySearchUserRespDefaultTypeInternal _FuzzySearchUserResp_default_instance_;
 class GetUserProfileReq;
 struct GetUserProfileReqDefaultTypeInternal;
 extern GetUserProfileReqDefaultTypeInternal _GetUserProfileReq_default_instance_;
@@ -2926,6 +2932,429 @@ class GetUserProfileReq final : public ::google::protobuf::Message
   union { Impl_ _impl_; };
   friend struct ::TableStruct_user_2eproto;
 };
+// -------------------------------------------------------------------
+
+class FuzzySearchUserReq final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:user.FuzzySearchUserReq) */ {
+ public:
+  inline FuzzySearchUserReq() : FuzzySearchUserReq(nullptr) {}
+  ~FuzzySearchUserReq() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(FuzzySearchUserReq* msg, std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(FuzzySearchUserReq));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR FuzzySearchUserReq(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline FuzzySearchUserReq(const FuzzySearchUserReq& from) : FuzzySearchUserReq(nullptr, from) {}
+  inline FuzzySearchUserReq(FuzzySearchUserReq&& from) noexcept
+      : FuzzySearchUserReq(nullptr, std::move(from)) {}
+  inline FuzzySearchUserReq& operator=(const FuzzySearchUserReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline FuzzySearchUserReq& operator=(FuzzySearchUserReq&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const FuzzySearchUserReq& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const FuzzySearchUserReq* internal_default_instance() {
+    return reinterpret_cast<const FuzzySearchUserReq*>(
+        &_FuzzySearchUserReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 12;
+  friend void swap(FuzzySearchUserReq& a, FuzzySearchUserReq& b) { a.Swap(&b); }
+  inline void Swap(FuzzySearchUserReq* other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(FuzzySearchUserReq* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  FuzzySearchUserReq* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<FuzzySearchUserReq>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const FuzzySearchUserReq& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const FuzzySearchUserReq& from) { FuzzySearchUserReq::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(FuzzySearchUserReq* other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(
+      ::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "user.FuzzySearchUserReq"; }
+
+ protected:
+  explicit FuzzySearchUserReq(::google::protobuf::Arena* arena);
+  FuzzySearchUserReq(::google::protobuf::Arena* arena, const FuzzySearchUserReq& from);
+  FuzzySearchUserReq(::google::protobuf::Arena* arena, FuzzySearchUserReq&& from) noexcept
+      : FuzzySearchUserReq(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+  static const ::google::protobuf::internal::ClassDataFull _class_data_;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kUidFieldNumber = 1,
+    kPatternFieldNumber = 2,
+  };
+  // string uid = 1;
+  void clear_uid() ;
+  const std::string& uid() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_uid(Arg_&& arg, Args_... args);
+  std::string* mutable_uid();
+  PROTOBUF_NODISCARD std::string* release_uid();
+  void set_allocated_uid(std::string* value);
+
+  private:
+  const std::string& _internal_uid() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_uid(
+      const std::string& value);
+  std::string* _internal_mutable_uid();
+
+  public:
+  // string pattern = 2;
+  void clear_pattern() ;
+  const std::string& pattern() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_pattern(Arg_&& arg, Args_... args);
+  std::string* mutable_pattern();
+  PROTOBUF_NODISCARD std::string* release_pattern();
+  void set_allocated_pattern(std::string* value);
+
+  private:
+  const std::string& _internal_pattern() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_pattern(
+      const std::string& value);
+  std::string* _internal_mutable_pattern();
+
+  public:
+  // @@protoc_insertion_point(class_scope:user.FuzzySearchUserReq)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      1, 2, 0,
+      42, 2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const FuzzySearchUserReq& from_msg);
+    ::google::protobuf::internal::ArenaStringPtr uid_;
+    ::google::protobuf::internal::ArenaStringPtr pattern_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_user_2eproto;
+};
+// -------------------------------------------------------------------
+
+class FuzzySearchUserResp final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:user.FuzzySearchUserResp) */ {
+ public:
+  inline FuzzySearchUserResp() : FuzzySearchUserResp(nullptr) {}
+  ~FuzzySearchUserResp() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(FuzzySearchUserResp* msg, std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(FuzzySearchUserResp));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR FuzzySearchUserResp(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline FuzzySearchUserResp(const FuzzySearchUserResp& from) : FuzzySearchUserResp(nullptr, from) {}
+  inline FuzzySearchUserResp(FuzzySearchUserResp&& from) noexcept
+      : FuzzySearchUserResp(nullptr, std::move(from)) {}
+  inline FuzzySearchUserResp& operator=(const FuzzySearchUserResp& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline FuzzySearchUserResp& operator=(FuzzySearchUserResp&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const FuzzySearchUserResp& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const FuzzySearchUserResp* internal_default_instance() {
+    return reinterpret_cast<const FuzzySearchUserResp*>(
+        &_FuzzySearchUserResp_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 13;
+  friend void swap(FuzzySearchUserResp& a, FuzzySearchUserResp& b) { a.Swap(&b); }
+  inline void Swap(FuzzySearchUserResp* other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(FuzzySearchUserResp* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  FuzzySearchUserResp* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<FuzzySearchUserResp>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const FuzzySearchUserResp& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const FuzzySearchUserResp& from) { FuzzySearchUserResp::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(FuzzySearchUserResp* other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(
+      ::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "user.FuzzySearchUserResp"; }
+
+ protected:
+  explicit FuzzySearchUserResp(::google::protobuf::Arena* arena);
+  FuzzySearchUserResp(::google::protobuf::Arena* arena, const FuzzySearchUserResp& from);
+  FuzzySearchUserResp(::google::protobuf::Arena* arena, FuzzySearchUserResp&& from) noexcept
+      : FuzzySearchUserResp(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+  static const ::google::protobuf::internal::ClassDataFull _class_data_;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kResultsFieldNumber = 2,
+    kErrorFieldNumber = 1,
+  };
+  // repeated .user.GetUserProfileResp results = 2;
+  int results_size() const;
+  private:
+  int _internal_results_size() const;
+
+  public:
+  void clear_results() ;
+  ::user::GetUserProfileResp* mutable_results(int index);
+  ::google::protobuf::RepeatedPtrField<::user::GetUserProfileResp>* mutable_results();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::user::GetUserProfileResp>& _internal_results() const;
+  ::google::protobuf::RepeatedPtrField<::user::GetUserProfileResp>* _internal_mutable_results();
+  public:
+  const ::user::GetUserProfileResp& results(int index) const;
+  ::user::GetUserProfileResp* add_results();
+  const ::google::protobuf::RepeatedPtrField<::user::GetUserProfileResp>& results() const;
+  // int32 error = 1;
+  void clear_error() ;
+  ::int32_t error() const;
+  void set_error(::int32_t value);
+
+  private:
+  ::int32_t _internal_error() const;
+  void _internal_set_error(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:user.FuzzySearchUserResp)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      1, 2, 1,
+      0, 2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const FuzzySearchUserResp& from_msg);
+    ::google::protobuf::RepeatedPtrField< ::user::GetUserProfileResp > results_;
+    ::int32_t error_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_user_2eproto;
+};
 
 // ===================================================================
 
@@ -4715,6 +5144,181 @@ inline ::int32_t UpdateUserProfileResp::_internal_error() const {
 inline void UpdateUserProfileResp::_internal_set_error(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.error_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// FuzzySearchUserReq
+
+// string uid = 1;
+inline void FuzzySearchUserReq::clear_uid() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.uid_.ClearToEmpty();
+}
+inline const std::string& FuzzySearchUserReq::uid() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:user.FuzzySearchUserReq.uid)
+  return _internal_uid();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void FuzzySearchUserReq::set_uid(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.uid_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:user.FuzzySearchUserReq.uid)
+}
+inline std::string* FuzzySearchUserReq::mutable_uid() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_uid();
+  // @@protoc_insertion_point(field_mutable:user.FuzzySearchUserReq.uid)
+  return _s;
+}
+inline const std::string& FuzzySearchUserReq::_internal_uid() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.uid_.Get();
+}
+inline void FuzzySearchUserReq::_internal_set_uid(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.uid_.Set(value, GetArena());
+}
+inline std::string* FuzzySearchUserReq::_internal_mutable_uid() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.uid_.Mutable( GetArena());
+}
+inline std::string* FuzzySearchUserReq::release_uid() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:user.FuzzySearchUserReq.uid)
+  return _impl_.uid_.Release();
+}
+inline void FuzzySearchUserReq::set_allocated_uid(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.uid_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.uid_.IsDefault()) {
+    _impl_.uid_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:user.FuzzySearchUserReq.uid)
+}
+
+// string pattern = 2;
+inline void FuzzySearchUserReq::clear_pattern() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pattern_.ClearToEmpty();
+}
+inline const std::string& FuzzySearchUserReq::pattern() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:user.FuzzySearchUserReq.pattern)
+  return _internal_pattern();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void FuzzySearchUserReq::set_pattern(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pattern_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:user.FuzzySearchUserReq.pattern)
+}
+inline std::string* FuzzySearchUserReq::mutable_pattern() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_pattern();
+  // @@protoc_insertion_point(field_mutable:user.FuzzySearchUserReq.pattern)
+  return _s;
+}
+inline const std::string& FuzzySearchUserReq::_internal_pattern() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.pattern_.Get();
+}
+inline void FuzzySearchUserReq::_internal_set_pattern(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pattern_.Set(value, GetArena());
+}
+inline std::string* FuzzySearchUserReq::_internal_mutable_pattern() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.pattern_.Mutable( GetArena());
+}
+inline std::string* FuzzySearchUserReq::release_pattern() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:user.FuzzySearchUserReq.pattern)
+  return _impl_.pattern_.Release();
+}
+inline void FuzzySearchUserReq::set_allocated_pattern(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.pattern_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.pattern_.IsDefault()) {
+    _impl_.pattern_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:user.FuzzySearchUserReq.pattern)
+}
+
+// -------------------------------------------------------------------
+
+// FuzzySearchUserResp
+
+// int32 error = 1;
+inline void FuzzySearchUserResp::clear_error() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.error_ = 0;
+}
+inline ::int32_t FuzzySearchUserResp::error() const {
+  // @@protoc_insertion_point(field_get:user.FuzzySearchUserResp.error)
+  return _internal_error();
+}
+inline void FuzzySearchUserResp::set_error(::int32_t value) {
+  _internal_set_error(value);
+  // @@protoc_insertion_point(field_set:user.FuzzySearchUserResp.error)
+}
+inline ::int32_t FuzzySearchUserResp::_internal_error() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.error_;
+}
+inline void FuzzySearchUserResp::_internal_set_error(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.error_ = value;
+}
+
+// repeated .user.GetUserProfileResp results = 2;
+inline int FuzzySearchUserResp::_internal_results_size() const {
+  return _internal_results().size();
+}
+inline int FuzzySearchUserResp::results_size() const {
+  return _internal_results_size();
+}
+inline void FuzzySearchUserResp::clear_results() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.results_.Clear();
+}
+inline ::user::GetUserProfileResp* FuzzySearchUserResp::mutable_results(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:user.FuzzySearchUserResp.results)
+  return _internal_mutable_results()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::user::GetUserProfileResp>* FuzzySearchUserResp::mutable_results()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:user.FuzzySearchUserResp.results)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_results();
+}
+inline const ::user::GetUserProfileResp& FuzzySearchUserResp::results(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:user.FuzzySearchUserResp.results)
+  return _internal_results().Get(index);
+}
+inline ::user::GetUserProfileResp* FuzzySearchUserResp::add_results() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::user::GetUserProfileResp* _add = _internal_mutable_results()->Add();
+  // @@protoc_insertion_point(field_add:user.FuzzySearchUserResp.results)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::user::GetUserProfileResp>& FuzzySearchUserResp::results() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:user.FuzzySearchUserResp.results)
+  return _internal_results();
+}
+inline const ::google::protobuf::RepeatedPtrField<::user::GetUserProfileResp>&
+FuzzySearchUserResp::_internal_results() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.results_;
+}
+inline ::google::protobuf::RepeatedPtrField<::user::GetUserProfileResp>*
+FuzzySearchUserResp::_internal_mutable_results() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.results_;
 }
 
 #ifdef __GNUC__

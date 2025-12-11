@@ -33,6 +33,21 @@
     <ClCompile Include="RedisConPool.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="status.grpc.pb.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="status.pb.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ChatGrpcClient.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="chat.grpc.pb.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="chat.pb.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConfigManager.h">
@@ -59,9 +74,29 @@
     <ClInclude Include="Logger.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="status.grpc.pb.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="status.pb.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ChatGrpcClient.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GrpcPool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="chat.grpc.pb.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="chat.pb.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="config.ini" />
     <None Include="message.proto" />
+    <None Include="status.proto" />
+    <None Include="chat.proto" />
   </ItemGroup>
 </Project>

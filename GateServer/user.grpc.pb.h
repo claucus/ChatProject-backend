@@ -35,6 +35,8 @@ namespace user {
 //   - Login verification
 //   - Password reset
 //   - Basic profile fetch
+//   - Profile update
+//   - Fuzzy user search
 //   - CAPTCHA checking requested by GateServer
 //
 //
@@ -86,13 +88,21 @@ class UserService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::user::GetUserProfileResp>> PrepareAsyncGetUserProfile(::grpc::ClientContext* context, const ::user::GetUserProfileReq& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::user::GetUserProfileResp>>(PrepareAsyncGetUserProfileRaw(context, request, cq));
     }
-    // 6. Update user profile (not used yet by GateServer but necessary)
+    // 6. Update user profile
     virtual ::grpc::Status UpdateUserProfile(::grpc::ClientContext* context, const ::user::UpdateUserProfileReq& request, ::user::UpdateUserProfileResp* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::user::UpdateUserProfileResp>> AsyncUpdateUserProfile(::grpc::ClientContext* context, const ::user::UpdateUserProfileReq& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::user::UpdateUserProfileResp>>(AsyncUpdateUserProfileRaw(context, request, cq));
     }
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::user::UpdateUserProfileResp>> PrepareAsyncUpdateUserProfile(::grpc::ClientContext* context, const ::user::UpdateUserProfileReq& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::user::UpdateUserProfileResp>>(PrepareAsyncUpdateUserProfileRaw(context, request, cq));
+    }
+    // 7. Fuzzy Search a user by uid and pattern
+    virtual ::grpc::Status FuzzySearchUser(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq& request, ::user::FuzzySearchUserResp* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::user::FuzzySearchUserResp>> AsyncFuzzySearchUser(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::user::FuzzySearchUserResp>>(AsyncFuzzySearchUserRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::user::FuzzySearchUserResp>> PrepareAsyncFuzzySearchUser(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::user::FuzzySearchUserResp>>(PrepareAsyncFuzzySearchUserRaw(context, request, cq));
     }
     class async_interface {
      public:
@@ -112,9 +122,12 @@ class UserService final {
       // 5. Fetch user basic info (for login or friend lists)
       virtual void GetUserProfile(::grpc::ClientContext* context, const ::user::GetUserProfileReq* request, ::user::GetUserProfileResp* response, std::function<void(::grpc::Status)>) = 0;
       virtual void GetUserProfile(::grpc::ClientContext* context, const ::user::GetUserProfileReq* request, ::user::GetUserProfileResp* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      // 6. Update user profile (not used yet by GateServer but necessary)
+      // 6. Update user profile
       virtual void UpdateUserProfile(::grpc::ClientContext* context, const ::user::UpdateUserProfileReq* request, ::user::UpdateUserProfileResp* response, std::function<void(::grpc::Status)>) = 0;
       virtual void UpdateUserProfile(::grpc::ClientContext* context, const ::user::UpdateUserProfileReq* request, ::user::UpdateUserProfileResp* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      // 7. Fuzzy Search a user by uid and pattern
+      virtual void FuzzySearchUser(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq* request, ::user::FuzzySearchUserResp* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void FuzzySearchUser(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq* request, ::user::FuzzySearchUserResp* response, ::grpc::ClientUnaryReactor* reactor) = 0;
     };
     typedef class async_interface experimental_async_interface;
     virtual class async_interface* async() { return nullptr; }
@@ -132,6 +145,8 @@ class UserService final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::user::GetUserProfileResp>* PrepareAsyncGetUserProfileRaw(::grpc::ClientContext* context, const ::user::GetUserProfileReq& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::user::UpdateUserProfileResp>* AsyncUpdateUserProfileRaw(::grpc::ClientContext* context, const ::user::UpdateUserProfileReq& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::user::UpdateUserProfileResp>* PrepareAsyncUpdateUserProfileRaw(::grpc::ClientContext* context, const ::user::UpdateUserProfileReq& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::user::FuzzySearchUserResp>* AsyncFuzzySearchUserRaw(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::user::FuzzySearchUserResp>* PrepareAsyncFuzzySearchUserRaw(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
@@ -178,6 +193,13 @@ class UserService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::user::UpdateUserProfileResp>> PrepareAsyncUpdateUserProfile(::grpc::ClientContext* context, const ::user::UpdateUserProfileReq& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::user::UpdateUserProfileResp>>(PrepareAsyncUpdateUserProfileRaw(context, request, cq));
     }
+    ::grpc::Status FuzzySearchUser(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq& request, ::user::FuzzySearchUserResp* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::user::FuzzySearchUserResp>> AsyncFuzzySearchUser(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::user::FuzzySearchUserResp>>(AsyncFuzzySearchUserRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::user::FuzzySearchUserResp>> PrepareAsyncFuzzySearchUser(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::user::FuzzySearchUserResp>>(PrepareAsyncFuzzySearchUserRaw(context, request, cq));
+    }
     class async final :
       public StubInterface::async_interface {
      public:
@@ -193,6 +215,8 @@ class UserService final {
       void GetUserProfile(::grpc::ClientContext* context, const ::user::GetUserProfileReq* request, ::user::GetUserProfileResp* response, ::grpc::ClientUnaryReactor* reactor) override;
       void UpdateUserProfile(::grpc::ClientContext* context, const ::user::UpdateUserProfileReq* request, ::user::UpdateUserProfileResp* response, std::function<void(::grpc::Status)>) override;
       void UpdateUserProfile(::grpc::ClientContext* context, const ::user::UpdateUserProfileReq* request, ::user::UpdateUserProfileResp* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void FuzzySearchUser(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq* request, ::user::FuzzySearchUserResp* response, std::function<void(::grpc::Status)>) override;
+      void FuzzySearchUser(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq* request, ::user::FuzzySearchUserResp* response, ::grpc::ClientUnaryReactor* reactor) override;
      private:
       friend class Stub;
       explicit async(Stub* stub): stub_(stub) { }
@@ -216,12 +240,15 @@ class UserService final {
     ::grpc::ClientAsyncResponseReader< ::user::GetUserProfileResp>* PrepareAsyncGetUserProfileRaw(::grpc::ClientContext* context, const ::user::GetUserProfileReq& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::user::UpdateUserProfileResp>* AsyncUpdateUserProfileRaw(::grpc::ClientContext* context, const ::user::UpdateUserProfileReq& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::user::UpdateUserProfileResp>* PrepareAsyncUpdateUserProfileRaw(::grpc::ClientContext* context, const ::user::UpdateUserProfileReq& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::user::FuzzySearchUserResp>* AsyncFuzzySearchUserRaw(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::user::FuzzySearchUserResp>* PrepareAsyncFuzzySearchUserRaw(::grpc::ClientContext* context, const ::user::FuzzySearchUserReq& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_VerifyEmailCode_;
     const ::grpc::internal::RpcMethod rpcmethod_RegisterUser_;
     const ::grpc::internal::RpcMethod rpcmethod_VerifyLogin_;
     const ::grpc::internal::RpcMethod rpcmethod_ResetPassword_;
     const ::grpc::internal::RpcMethod rpcmethod_GetUserProfile_;
     const ::grpc::internal::RpcMethod rpcmethod_UpdateUserProfile_;
+    const ::grpc::internal::RpcMethod rpcmethod_FuzzySearchUser_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -239,8 +266,10 @@ class UserService final {
     virtual ::grpc::Status ResetPassword(::grpc::ServerContext* context, const ::user::ResetPasswordReq* request, ::user::ResetPasswordResp* response);
     // 5. Fetch user basic info (for login or friend lists)
     virtual ::grpc::Status GetUserProfile(::grpc::ServerContext* context, const ::user::GetUserProfileReq* request, ::user::GetUserProfileResp* response);
-    // 6. Update user profile (not used yet by GateServer but necessary)
+    // 6. Update user profile
     virtual ::grpc::Status UpdateUserProfile(::grpc::ServerContext* context, const ::user::UpdateUserProfileReq* request, ::user::UpdateUserProfileResp* response);
+    // 7. Fuzzy Search a user by uid and pattern
+    virtual ::grpc::Status FuzzySearchUser(::grpc::ServerContext* context, const ::user::FuzzySearchUserReq* request, ::user::FuzzySearchUserResp* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_VerifyEmailCode : public BaseClass {
@@ -362,7 +391,27 @@ class UserService final {
       ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_VerifyEmailCode<WithAsyncMethod_RegisterUser<WithAsyncMethod_VerifyLogin<WithAsyncMethod_ResetPassword<WithAsyncMethod_GetUserProfile<WithAsyncMethod_UpdateUserProfile<Service > > > > > > AsyncService;
+  template <class BaseClass>
+  class WithAsyncMethod_FuzzySearchUser : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_FuzzySearchUser() {
+      ::grpc::Service::MarkMethodAsync(6);
+    }
+    ~WithAsyncMethod_FuzzySearchUser() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status FuzzySearchUser(::grpc::ServerContext* /*context*/, const ::user::FuzzySearchUserReq* /*request*/, ::user::FuzzySearchUserResp* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestFuzzySearchUser(::grpc::ServerContext* context, ::user::FuzzySearchUserReq* request, ::grpc::ServerAsyncResponseWriter< ::user::FuzzySearchUserResp>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(6, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  typedef WithAsyncMethod_VerifyEmailCode<WithAsyncMethod_RegisterUser<WithAsyncMethod_VerifyLogin<WithAsyncMethod_ResetPassword<WithAsyncMethod_GetUserProfile<WithAsyncMethod_UpdateUserProfile<WithAsyncMethod_FuzzySearchUser<Service > > > > > > > AsyncService;
   template <class BaseClass>
   class WithCallbackMethod_VerifyEmailCode : public BaseClass {
    private:
@@ -525,7 +574,34 @@ class UserService final {
     virtual ::grpc::ServerUnaryReactor* UpdateUserProfile(
       ::grpc::CallbackServerContext* /*context*/, const ::user::UpdateUserProfileReq* /*request*/, ::user::UpdateUserProfileResp* /*response*/)  { return nullptr; }
   };
-  typedef WithCallbackMethod_VerifyEmailCode<WithCallbackMethod_RegisterUser<WithCallbackMethod_VerifyLogin<WithCallbackMethod_ResetPassword<WithCallbackMethod_GetUserProfile<WithCallbackMethod_UpdateUserProfile<Service > > > > > > CallbackService;
+  template <class BaseClass>
+  class WithCallbackMethod_FuzzySearchUser : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithCallbackMethod_FuzzySearchUser() {
+      ::grpc::Service::MarkMethodCallback(6,
+          new ::grpc::internal::CallbackUnaryHandler< ::user::FuzzySearchUserReq, ::user::FuzzySearchUserResp>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::user::FuzzySearchUserReq* request, ::user::FuzzySearchUserResp* response) { return this->FuzzySearchUser(context, request, response); }));}
+    void SetMessageAllocatorFor_FuzzySearchUser(
+        ::grpc::MessageAllocator< ::user::FuzzySearchUserReq, ::user::FuzzySearchUserResp>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(6);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::user::FuzzySearchUserReq, ::user::FuzzySearchUserResp>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~WithCallbackMethod_FuzzySearchUser() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status FuzzySearchUser(::grpc::ServerContext* /*context*/, const ::user::FuzzySearchUserReq* /*request*/, ::user::FuzzySearchUserResp* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* FuzzySearchUser(
+      ::grpc::CallbackServerContext* /*context*/, const ::user::FuzzySearchUserReq* /*request*/, ::user::FuzzySearchUserResp* /*response*/)  { return nullptr; }
+  };
+  typedef WithCallbackMethod_VerifyEmailCode<WithCallbackMethod_RegisterUser<WithCallbackMethod_VerifyLogin<WithCallbackMethod_ResetPassword<WithCallbackMethod_GetUserProfile<WithCallbackMethod_UpdateUserProfile<WithCallbackMethod_FuzzySearchUser<Service > > > > > > > CallbackService;
   typedef CallbackService ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_VerifyEmailCode : public BaseClass {
@@ -625,6 +701,23 @@ class UserService final {
     }
     // disable synchronous version of this method
     ::grpc::Status UpdateUserProfile(::grpc::ServerContext* /*context*/, const ::user::UpdateUserProfileReq* /*request*/, ::user::UpdateUserProfileResp* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_FuzzySearchUser : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_FuzzySearchUser() {
+      ::grpc::Service::MarkMethodGeneric(6);
+    }
+    ~WithGenericMethod_FuzzySearchUser() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status FuzzySearchUser(::grpc::ServerContext* /*context*/, const ::user::FuzzySearchUserReq* /*request*/, ::user::FuzzySearchUserResp* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -747,6 +840,26 @@ class UserService final {
     }
     void RequestUpdateUserProfile(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_FuzzySearchUser : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_FuzzySearchUser() {
+      ::grpc::Service::MarkMethodRaw(6);
+    }
+    ~WithRawMethod_FuzzySearchUser() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status FuzzySearchUser(::grpc::ServerContext* /*context*/, const ::user::FuzzySearchUserReq* /*request*/, ::user::FuzzySearchUserResp* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestFuzzySearchUser(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(6, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -879,6 +992,28 @@ class UserService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     virtual ::grpc::ServerUnaryReactor* UpdateUserProfile(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithRawCallbackMethod_FuzzySearchUser : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawCallbackMethod_FuzzySearchUser() {
+      ::grpc::Service::MarkMethodRawCallback(6,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->FuzzySearchUser(context, request, response); }));
+    }
+    ~WithRawCallbackMethod_FuzzySearchUser() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status FuzzySearchUser(::grpc::ServerContext* /*context*/, const ::user::FuzzySearchUserReq* /*request*/, ::user::FuzzySearchUserResp* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* FuzzySearchUser(
       ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
@@ -1043,9 +1178,36 @@ class UserService final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedUpdateUserProfile(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::user::UpdateUserProfileReq,::user::UpdateUserProfileResp>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_VerifyEmailCode<WithStreamedUnaryMethod_RegisterUser<WithStreamedUnaryMethod_VerifyLogin<WithStreamedUnaryMethod_ResetPassword<WithStreamedUnaryMethod_GetUserProfile<WithStreamedUnaryMethod_UpdateUserProfile<Service > > > > > > StreamedUnaryService;
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_FuzzySearchUser : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_FuzzySearchUser() {
+      ::grpc::Service::MarkMethodStreamed(6,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::user::FuzzySearchUserReq, ::user::FuzzySearchUserResp>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::user::FuzzySearchUserReq, ::user::FuzzySearchUserResp>* streamer) {
+                       return this->StreamedFuzzySearchUser(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_FuzzySearchUser() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status FuzzySearchUser(::grpc::ServerContext* /*context*/, const ::user::FuzzySearchUserReq* /*request*/, ::user::FuzzySearchUserResp* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedFuzzySearchUser(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::user::FuzzySearchUserReq,::user::FuzzySearchUserResp>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_VerifyEmailCode<WithStreamedUnaryMethod_RegisterUser<WithStreamedUnaryMethod_VerifyLogin<WithStreamedUnaryMethod_ResetPassword<WithStreamedUnaryMethod_GetUserProfile<WithStreamedUnaryMethod_UpdateUserProfile<WithStreamedUnaryMethod_FuzzySearchUser<Service > > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_VerifyEmailCode<WithStreamedUnaryMethod_RegisterUser<WithStreamedUnaryMethod_VerifyLogin<WithStreamedUnaryMethod_ResetPassword<WithStreamedUnaryMethod_GetUserProfile<WithStreamedUnaryMethod_UpdateUserProfile<Service > > > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_VerifyEmailCode<WithStreamedUnaryMethod_RegisterUser<WithStreamedUnaryMethod_VerifyLogin<WithStreamedUnaryMethod_ResetPassword<WithStreamedUnaryMethod_GetUserProfile<WithStreamedUnaryMethod_UpdateUserProfile<WithStreamedUnaryMethod_FuzzySearchUser<Service > > > > > > > StreamedService;
 };
 
 }  // namespace user
